@@ -73,6 +73,6 @@ public static SafeReports noSafeReports(Path path) throws IOException {
 }
 
 public static void main() throws IOException {
-    SafeReports result = noSafeReports(Path.of("day_2/input.txt"));
+    SafeReports result = noSafeReports(Path.of("AoC-24-Java/input_files/day_2/input.txt"));
     System.out.printf("Safe Reports: %d\nTotal safe reports: %d", result.std_reports, result.sbl_reports);
 }
