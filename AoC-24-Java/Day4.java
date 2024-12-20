@@ -3,7 +3,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public static char[][] fileToArray(String path) {
     char[][] input = new char[140][140];
@@ -26,82 +30,98 @@ public static char[][] fileToArray(String path) {
     return input;
 }
 
-public static int countXmas(String path) {
+public static List<String> getWordSearch(String path) {
     char[][] input = fileToArray(path);
+    int size = input.length;
+    int length = input[0].length;
+
+    // Get rows
+    List<String> wordSearch = Arrays.stream(input)
+            .map(String::new) // Converts each char[] object from stream into a string
+            .collect(Collectors.toCollection(ArrayList::new)); // Collects each strings and adds to a mutable list
+
+    // Get columns
+    for (int i = 0; i < length; i++) {
+        StringBuilder col = new StringBuilder(size);
+        for (char[] chars : input) {
+            col.append(chars[i]);
+        }
+        wordSearch.add(col.toString());
+    }
+
+    // Create new matrix rotated 90 degrees for full diagonal coverage
+    char[][] inputRotated = new char[size][length];
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            inputRotated[j][size - i - 1] = input[i][j];
+        }
+    }
+
+    // Add new matrix to list so diagonals are obtained from normal and rotated matrices
+    List<char[][]> inputList = new ArrayList<>();
+    inputList.add(input);
+    inputList.add(inputRotated);
+
+    for (var matrix : inputList) {
+        // Getting diagonals from LHS to bottom
+        for (int i = 4; i <= size; i++) {
+            int j = 0;
+            int start = size - i;
+            StringBuilder diagonal = new StringBuilder(size);
+
+            // Iterate through diagonal
+            while (start != size) {
+                diagonal.append(matrix[start][j]);
+                start++;
+                j++;
+            }
+
+            wordSearch.add(diagonal.toString());
+        }
+
+        // Getting diagonals from top to RHS
+        for (int i = 4; i <= size - 1; i++) {
+            int start = size - i;
+            int j = 0;
+            StringBuilder diagonal = new StringBuilder(size);
+
+            // Iterate through diagonal
+            while (start != size) {
+                diagonal.append(matrix[j][start]);
+                start++;
+                j++;
+            }
+
+            wordSearch.add(diagonal.toString());
+        }
+    }
+
+    System.out.println(wordSearch);
+    return wordSearch;
+}
+
+public static int getXmasCount(String path) {
     int xmasCount = 0;
-/*
-    // Check rows for XMAS
-    for (var line : input) {
-        System.out.println(line);
-        for (int i = 0; i < line.length - 4; i++) {
-            if (line[i] == 'X') { // FIX THIS SECTION! COMPARE NEXT 3 VALS AT ONCE.
-                if (line[i+1: i+4] == "MAS") {
-                    xmasCount++;
-                }
-            } else if (line[i] == 'S') {
-                if (line[i+1: i+4] == "AMX") {
-                    xmasCount++;
-                }
-            }
+    List<String> wordSearch = getWordSearch(path);
+
+    for (String str : wordSearch) {
+        int index = 0;
+        while ((index = str.indexOf("XMAS", index)) != -1) {
+            xmasCount++;
+            index += "XMAS".length();
+        }
+
+        index = 0;
+        while ((index = str.indexOf("SAMX", index)) != -1) {
+            xmasCount++;
+            index += "SAMX".length();
         }
     }
 
-    // Check columns for XMAS
-    for (int i = 0; i < input[0].length; i++) {
-        for (int j = 0; j < input.length - 4; j++) {
-            if (input[j][i] == 'X') {
-                if (input[j+1: j+4] == "MAS") {
-                    xmasCount++;
-                }
-            } else if (input[j][i] == 'S') {
-                if (input[j+1: j+4][i] == "AMX") {
-                    xmasCount++;
-                }
-            }
-        }
-    }
- */
-
-    // TODO: create a new char[][] by rotating input[][] 90 degrees. Wrap below in loop which uses both as input.
-
-    // TODO: Convert arrays of chars to strings (or get them as strings) for substring comparisons ("XMAS").
-
-    // Starting at bottom left corner and getting diagonals
-    for (int i = 4; i <= input.length; i++) {
-        int start = input.length - i;
-        int j = 0;
-        List<Character> diagonal = new ArrayList<>();
-
-        // Iterate through diagonal
-        while (start != input.length) {
-            diagonal.add(input[start][j]);
-            start++;
-            j++;
-        }
-
-        System.out.println(diagonal);
-    }
-
-    // Same as before, but starting from top right corner and ending before middle
-    for (int i = 4; i <= input.length - 1; i++) {
-        int start = input.length - i;
-        int j = 0;
-        List<Character> diagonal = new ArrayList<>();
-
-        // Iterate through diagonal
-        while (start != input.length) {
-            diagonal.add(input[j][start]);
-            start++;
-            j++;
-        }
-
-        System.out.println(diagonal);
-    }
-
-    return 0;
+   return xmasCount;
 }
 
 public static void main() {
     System.out.println("Hello, Advent of Code day 4!");
-    System.out.println(countXmas("AoC-24-Java/input_files/day_4/input.txt"));
+    System.out.println(getXmasCount("AoC-24-Java/input_files/day_4/input.txt"));
 }
