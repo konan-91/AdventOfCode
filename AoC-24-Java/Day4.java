@@ -2,11 +2,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public static char[][] fileToArray(String path) {
@@ -96,7 +92,6 @@ public static List<String> getWordSearch(String path) {
         }
     }
 
-    System.out.println(wordSearch);
     return wordSearch;
 }
 
@@ -121,7 +116,38 @@ public static int getXmasCount(String path) {
    return xmasCount;
 }
 
+public static int getXofMasCount(String path) {
+    int XofMasCount = 0;
+    char[][] input = fileToArray(path);
+
+    // Verify 4 corners of X contain 2 M's & 2 S's
+    for (int i = 1; i < input.length - 1; i++) {
+        for (int j = 1; j < input[1].length - 1; j++) {
+            if (input[i][j] == 'A') {
+                Set<Character> chars = new HashSet<>();
+                chars.add(input[i + 1][j + 1]);
+                chars.add(input[i - 1][j - 1]);
+
+                if (chars.size() != 2 || !chars.contains('M') || !chars.contains('S')) {
+                    continue;
+                }
+
+                chars.clear();
+                chars.add(input[i + 1][j - 1]);
+                chars.add(input[i - 1][j + 1]);
+
+                if (chars.size() == 2 && chars.contains('M') && chars.contains('S')) {
+                    XofMasCount++;
+                }
+            }
+        }
+    }
+
+    return XofMasCount;
+}
+
 public static void main() {
     System.out.println("Hello, Advent of Code day 4!");
-    System.out.println(getXmasCount("AoC-24-Java/input_files/day_4/input.txt"));
+    System.out.printf("XMAS count: %d%n", getXmasCount("AoC-24-Java/input_files/day_4/input.txt"));
+    System.out.printf("X of MAS count: %d%n", getXofMasCount("AoC-24-Java/input_files/day_4/input.txt"));
 }
