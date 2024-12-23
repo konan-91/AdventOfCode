@@ -147,6 +147,6 @@ public static int getXofMasCount(String path) {
 }
 
 public static void main() {
-    System.out.printf("XMAS count: %d%n", getXmasCount("AoC-24-Java/input_files/day_4/input.txt"));
-    System.out.printf("X of MAS count: %d%n", getXofMasCount("AoC-24-Java/input_files/day_4/input.txt"));
+    System.out.printf("XMAS count: %d%n", getXmasCount("AoC-24/input_files/day_4/input.txt"));
+    System.out.printf("X of MAS count: %d%n", getXofMasCount("AoC-24/input_files/day_4/input.txt"));
 }
