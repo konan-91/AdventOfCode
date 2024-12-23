@@ -2,16 +2,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
-public static class SafeReports {
-    public int std_reports;
-    public int sbl_reports;
-
-    public SafeReports(int std_reports, int sbl_reports) {
-        this.std_reports = std_reports;
-        this.sbl_reports = sbl_reports;
-    }
-}
+import java.util.Arrays;
+import java.util.List;
 
 public static boolean safetyCheck(int[] report) {
     boolean asc = true;
@@ -29,7 +21,7 @@ public static boolean safetyCheck(int[] report) {
     return asc || desc;
 }
 
-public static SafeReports noSafeReports(Path path) throws IOException {
+public static List<Integer> noSafeReports(Path path) throws IOException {
     int std_reports = 0, sbl_reports = 0;
     try (BufferedReader reader = Files.newBufferedReader(path)) {
         String line;
@@ -69,10 +61,10 @@ public static SafeReports noSafeReports(Path path) throws IOException {
         }
     }
 
-    return new SafeReports(std_reports, std_reports + sbl_reports);
+    return Arrays.asList(std_reports, std_reports + sbl_reports);
 }
 
 public static void main() throws IOException {
-    SafeReports result = noSafeReports(Path.of("AoC-24-Java/input_files/day_2/input.txt"));
-    System.out.printf("Safe Reports: %d\nTotal safe reports: %d", result.std_reports, result.sbl_reports);
+    List<Integer> result = noSafeReports(Path.of("AoC-24-Java/input_files/day_2/input.txt"));
+    System.out.printf("Safe Reports: %d\nTotal safe reports: %d", result.get(0), result.get(1));
 }
