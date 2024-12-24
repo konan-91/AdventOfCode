@@ -1,1 +1,1 @@
-Advent Of Code 2024. Solutions in Java && C++.
+Advent Of Code 2024. Solutions in Java and C++.
