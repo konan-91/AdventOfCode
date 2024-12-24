@@ -31,21 +31,55 @@ std::vector<std::vector<char>> readFile(const std::string& path) {
 }
 
 int simulatePatrol(const std::string& path) {
-    std::vector<std::vector<char> > lab = readFile(path);
-    std::set<std::tuple<int, int>> positionSet;
-    std::string direction = "up";
+    const std::vector<std::vector<char> > lab = readFile(path);
+    std::set<std::array<int, 2>> positionSet;
+    std::array currentPosition = {0, 0};
+    std::string direction = "north";
 
-    // find starting position (^)
+    for (int i = 0; i < lab.size(); i++) {
+        for (int j = 0; j < lab[0].size(); j++) {
+            if (lab[i][j] == '^') {
+        }
+    }
 
-    // move in (direction)
-    // if next pos is at the edge and != "#', add to positionSet and break;
-    // else if next pos == "#",
-    // else add current position to set and continue...
+    const int yMax = static_cast<int>(lab.size() - 1);
+    const int xMax = static_cast<int>(lab[0].size() - 1);
 
-    return static_cast<int>(positionSet.size());
+    // Simulate traversal, counting unique positions visited
+    while (currentPosition[0] > 0 && currentPosition[0] < yMax && currentPosition[1] > 0 && currentPosition[1] < xMax) {
+        positionSet.insert(currentPosition);
+
+        if (direction == "north") {
+            if (lab[currentPosition[0] - 1][currentPosition[1]] == '#') {
+                direction = "east";
+            } else {
+                currentPosition[0]--;
+            }
+        } else if (direction == "east") {
+            if (lab[currentPosition[0]][currentPosition[1] + 1] == '#') {
+                direction = "south";
+            } else {
+                currentPosition[1]++;
+            }
+        } else if (direction == "south") {
+            if (lab[currentPosition[0] + 1][currentPosition[1]] == '#') {
+                direction = "west";
+            } else {
+                currentPosition[0]++;
+            }
+        } else if (direction == "west") {
+            if (lab[currentPosition[0]][currentPosition[1] - 1] == '#') {
+                direction = "north";
+            } else {
+                currentPosition[1]--;
+            }
+        }
+    }
+
+    return static_cast<int>(positionSet.size()) + 1;
 }
 
 int main() {
     const std::string path = "AoC-24/input_files/day_6/input.txt";
-    simulatePatrol(path);
+    std::cout << simulatePatrol(path) << std::endl;
 }
