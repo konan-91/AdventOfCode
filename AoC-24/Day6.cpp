@@ -67,7 +67,6 @@ int countLoops(Lab& lab, const std::set<std::array<int, 2>>& uniquePos) {
         auto posBackup = pos;
         lab.grid[pos[0]][pos[1]] = '#';
 
-        // Simulate traversal - if traversal spot has already been traversed with same direction, loop is present.
         std::array<int, 3> guard = {lab.startPos[0], lab.startPos[1], UP};
         std::set<std::array<int, 3>> traversedSet;
 
