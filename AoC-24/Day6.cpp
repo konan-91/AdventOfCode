@@ -1,17 +1,51 @@
 // Advent Of Code 2024++, Day 6.
+// ps you can probably make lab into an object which contains a matrix + yMax + xMax and that will cut down variables...
+// pps you can use enums position and then use a list [x, y, direction] to reduce complications
 
 #include <fstream>
 #include <iostream>
 #include <set>
 
-std::vector<std::vector<char>> readFile(const std::string& path) {
+enum Direction {
+    UP,     // 0
+    RIGHT,  // 1
+    DOWN,   // 2
+    LEFT    // 3
+};
+
+struct Lab {
+    std::vector<std::vector<char>> grid;
+    int yMax;
+    int xMax;
+    std::array<int, 2> startPos{};
+
+    explicit Lab(const std::vector<std::vector<char>>& input)
+        : grid(input)
+        , yMax(static_cast<int>(input.size() - 1))
+        , xMax(static_cast<int>(input.empty() ? 0 : input[0].size() - 1))
+    {
+        startPos = findStartPosition();
+    }
+
+private:
+    [[nodiscard]] std::array<int, 2> findStartPosition() const {
+        for (int i = 0; i < yMax; i++) {
+            for (int j = 0; j < xMax; j++) {
+                if (grid[i][j] == '^') return {i, j};
+            }
+        }
+        return {0, 0};
+    }
+};
+
+Lab readFile(const std::string& path) {
     std::ifstream file(path);
-    std::vector<std::vector<char>> lab;
-    lab.reserve(130);
+    std::vector<std::vector<char>> grid;
+    grid.reserve(130);
 
     if (!file.is_open()) {
         std::cerr << "Failed to open file!" << std::endl;
-        return lab;
+        return Lab(grid);  // Return empty Lab
     }
 
     std::string str;
@@ -21,177 +55,70 @@ std::vector<std::vector<char>> readFile(const std::string& path) {
         for (const char& c : str) {
             line.push_back(c);
         }
-
-        lab.push_back(line);
+        grid.push_back(line);
     }
 
-    return lab;
+    return Lab(grid);
 }
 
-bool loopCheck(const auto& target, auto currentPosition, auto& loopCheckSet, const auto& lab, const int& yMax, const int& xMax) {
-    while (currentPosition.first[0] > 0 && currentPosition.first[0] < yMax && currentPosition.first[1] > 0 && currentPosition.first[1] < xMax) {
-
-        if (currentPosition == target) {
-            return true;
-        }
-
-        /*
-        if (loopCheckSet.contains(currentPosition)) {
-            return false;
-        }
-        loopCheckSet.insert(currentPosition);
-        */
-
-        if (currentPosition.second == "north") {
-            if (lab[currentPosition.first[0] - 1][currentPosition.first[1]] == '#') {
-                currentPosition.second = "east";
-            } else {
-                --currentPosition.first[0];
-            }
-        }
-
-        else if (currentPosition.second == "east") {
-            if (lab[currentPosition.first[0]][currentPosition.first[1] + 1] == '#') {
-                currentPosition.second = "south";
-            } else {
-                ++currentPosition.first[1];
-            }
-        }
-
-        else if (currentPosition.second == "south") {
-            if (lab[currentPosition.first[0] + 1][currentPosition.first[1]] == '#') {
-                currentPosition.second = "west";
-            } else {
-                ++currentPosition.first[0];
-            }
-        }
-
-        else if (currentPosition.second == "west") {
-            if (lab[currentPosition.first[0]][currentPosition.first[1] - 1] == '#') {
-                currentPosition.second = "north";
-            } else {
-                --currentPosition.first[1];
-            }
-        }
-    }
-
-    return false;
-}
-
-int simulatePatrol(const std::string& path) {
-    const std::vector<std::vector<char> > lab = readFile(path);
-/*
-    const std::vector<std::vector<char> > lab = {
-        {'.','#','.','.','.','.'},
-        {'.','0','.','0','.','#'},
-        {'#','.','.','#','.','.'},
-        {'.','.','#','.','.','.'},
-        {'0','^','.','.','.','#'},
-        {'.','.','.','.','#','.'},
-    };
-
-    const std::vector<std::vector<char> > lab = {
-        {'.','.','.','.','#','.','.','.','.','.'},
-        {'.','.','.','.','.','.','.','.','.','#'},
-        {'.','.','.','.','.','.','.','.','.','.'},
-        {'.','.','#','.','.','.','.','.','.','.'},
-        {'.','.','.','.','.','.','.','#','.','.'},
-        {'.','.','.','.','.','.','.','.','.','.'},
-        {'.','#','.','0','^','.','.','.','.','.'},
-        {'.','.','.','.','.','.','X','X','#','.'},
-        {'#','X','.','X','.','.','.','.','.','.'},
-        {'.','.','.','.','.','.','#','X','.','.'}
-    };
-    */
-    int step = 0;
-    // DON'T CALL THE FUCKING FUNCTION IF WHERE YOU WOULD BE PLACING THE # IS A ^. LOGIC NEEDS TO GO IN simulatePatrol() !!!!!!!!!!!!!!!!!!
-    std::set<std::pair<std::array<int, 2>, std::string>> loopCheckSet;
-    std::set<std::array<int, 2>> positionSet;
-    std::array currentPosition = {0, 0};
-    std::string direction = "north";
+// Change the actual lab value as it's faster than creating a copy - just be sure to change it back when you're finished.
+int countLoops(Lab& lab, std::set<std::array<int, 3>>& uniquePos) {
     int loopCount = 0;
 
-    for (int i = 0; i < lab.size(); i++) {
-        for (int j = 0; j < lab[0].size(); j++) {
-            if (lab[i][j] == '^') {
-                currentPosition = {i, j};
+    // REMOVE lab.startPos from uniquePos before starting, or else you may create a # on the starting position!
+    // uniquePos.erase(lab.startPos);
+
+    // Check every uniquePos for loops (start positions where
+
+
+
+    return loopCount;
+}
+
+std::pair<int, int> simulatePatrol(Lab& lab) {
+    std::set<std::array<int, 3>> uniquePosDir; // 3rs val is so we can tell what the orientation was at each position!
+    std::set<std::array<int, 2>> uniquePos;
+    std::array<int, 2> currentPos = lab.startPos;
+    Direction dir = UP;
+
+    while (currentPos[0] > 0 && currentPos[0] < lab.yMax && currentPos[1] > 0 && currentPos[1] < lab.xMax) {
+        uniquePos.insert({currentPos[0], currentPos[1]});
+        uniquePosDir.insert({currentPos[0], currentPos[1], dir});
+
+        if (dir == UP) {
+           if (lab.grid[currentPos[0] - 1][currentPos[1]] == '#') {
+               dir = RIGHT;
+           } else {
+               currentPos[0]--;
+           }
+        } else if (dir == RIGHT) {
+            if (lab.grid[currentPos[0]][currentPos[1] + 1] == '#') {
+                dir = DOWN;
+            } else {
+                currentPos[1]++;
+            }
+        } else if (dir == DOWN) {
+            if (lab.grid[currentPos[0] + 1][currentPos[1]] == '#') {
+                dir = LEFT;
+            } else {
+                currentPos[0]++;
+            }
+        } else if (dir == LEFT) {
+            if (lab.grid[currentPos[0]][currentPos[1] - 1] == '#') {
+                dir = UP;
+            } else {
+                currentPos[1]--;
             }
         }
     }
 
-    const int yMax = static_cast<int>(lab.size() - 1);
-    const int xMax = static_cast<int>(lab[0].size() - 1);
-
-    // Simulate traversal, counting unique positions visited
-    while (currentPosition[0] > 0 && currentPosition[0] < yMax && currentPosition[1] > 0 && currentPosition[1] < xMax) {
-        positionSet.insert(currentPosition);
-        loopCheckSet.insert({currentPosition, direction});
-
-        if (direction == "north") {
-            if (lab[currentPosition[0] - 1][currentPosition[1]] == '#') {
-                direction = "east";
-            } else {
-                if (lab[currentPosition[0] - 1][currentPosition[1]] != '^') {
-                    if (loopCheck(std::make_pair(currentPosition, direction), std::make_pair(currentPosition, "east"), loopCheckSet, lab, yMax, xMax)) {
-                        loopCount++;
-                    }
-                }
-
-                currentPosition[0]--;
-            }
-        }
-
-        else if (direction == "east") {
-            if (lab[currentPosition[0]][currentPosition[1] + 1] == '#') {
-                direction = "south";
-            } else {
-                if (lab[currentPosition[0]][currentPosition[1] + 1] != '^') {
-                    if (loopCheck(std::make_pair(currentPosition, direction), std::make_pair(currentPosition, "south"), loopCheckSet, lab, yMax, xMax)) {
-                        loopCount++;
-                    }
-                }
-
-                currentPosition[1]++;
-            }
-        }
-
-        else if (direction == "south") {
-            if (lab[currentPosition[0] + 1][currentPosition[1]] == '#') {
-                direction = "west";
-            } else {
-                if (lab[currentPosition[0] + 1][currentPosition[1]] != '^') {
-                    if (loopCheck(std::make_pair(currentPosition, direction), std::make_pair(currentPosition, "west"), loopCheckSet, lab, yMax, xMax)) {
-                        loopCount++;
-                    }
-                }
-
-                currentPosition[0]++;
-            }
-       }
-
-        else if (direction == "west") {
-            if (lab[currentPosition[0]][currentPosition[1] - 1] == '#') {
-                direction = "north";
-            } else {
-                if (lab[currentPosition[0]][currentPosition[1] - 1] != '^') {
-                    if (loopCheck(std::make_pair(currentPosition, direction), std::make_pair(currentPosition, "north"), loopCheckSet, lab, yMax, xMax)) {
-                        loopCount++;
-                    }
-                }
-
-                currentPosition[1]--;
-            }
-        }
-
-        step++;
-        std::cout << step << "\n";
-    }
-
-    std::cout << loopCount << std::endl;
-    return static_cast<int>(positionSet.size()) + 1;
+    return std::make_pair(uniquePos.size() + 1, countLoops(lab, uniquePos));
 }
 
 int main() {
-    const std::string path = "AoC-24/input_files/day_6/input.txt";
-    std::cout << simulatePatrol(path) << std::endl;
+    Lab lab{readFile("AoC-24/input_files/day_6/input.txt")};
+    auto [positionCount, loopCount] = simulatePatrol(lab);
+
+    std::cout << "Unique Positions: " << positionCount << std::endl;
+    std::cout << "Potential Loops: " << loopCount << std::endl;
 }
