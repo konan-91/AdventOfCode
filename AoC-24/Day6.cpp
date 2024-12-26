@@ -31,9 +31,14 @@ private:
     [[nodiscard]] std::array<int, 2> findStartPosition() const {
         for (int i = 0; i < yMax; i++) {
             for (int j = 0; j < xMax; j++) {
-                if (grid[i][j] == '^') return {i, j};
+                if (grid[i][j] == '^') {
+                    std::cout << "Found start position @: " << i << ", " << j << "\n";
+                    return {i, j};
+                }
             }
         }
+
+        std::cout << "get start position failed!...\n";
         return {0, 0};
     }
 };
@@ -58,19 +63,33 @@ Lab readFile(const std::string& path) {
         grid.push_back(line);
     }
 
-    return Lab(grid);
+
+    const std::vector<std::vector<char>> tempGrid = {
+        {'.','.','.','.','#','.','.','.','.','.'},
+        {'.','.','.','.','.','.','.','.','.','#'},
+        {'.','.','.','.','.','.','.','.','.','.'},
+        {'.','.','#','.','.','.','.','.','.','.'},
+        {'.','.','.','.','.','.','.','#','.','.'},
+        {'.','.','.','.','.','.','.','.','.','.'},
+        {'.','#','.','X','^','.','.','.','.','.'},
+        {'.','.','.','.','.','.','X','X','#','.'},
+        {'#','X','.','X','.','.','.','.','.','.'},
+        {'.','.','.','.','.','.','#','X','.','.'}
+    };
+
+
+    return Lab(tempGrid); // Changed from just 'grid'
 }
 
-// Change the actual lab value as it's faster than creating a copy - just be sure to change it back when you're finished.
 int countLoops(Lab& lab, const std::set<std::array<int, 3>>& obstaclePos) {
     int loopCount = 0;
-    int iter = 0;
 
     for (std::array<int, 3> pos : obstaclePos) {
+        std::cout << "Trying # at: " << pos[0] << ", " << pos[1] << ", " << pos[2] << "\n";
         std::set<std::array<int, 3>> loopCheck;
         auto posBackup = pos;
 
-        // Ensure the position '#' will be entered in is not the start position??
+        // Ensure position to be modified is not the starting position
         if (lab.grid[pos[0]][pos[1]] == '^') {
             continue;
         }
@@ -79,36 +98,41 @@ int countLoops(Lab& lab, const std::set<std::array<int, 3>>& obstaclePos) {
         lab.grid[pos[0]][pos[1]] = '#';
 
         // Start simulation
-        pos = {lab.startPos[0], lab.startPos[0], UP};
+        pos = {lab.startPos[0], lab.startPos[1], UP};
+        //std::cout << "Starting position: " << pos[0] << ", " << pos[1] << ", " << pos[2] << "\n";
+
         while (pos[0] > 0 && pos[0] < lab.yMax && pos[1] > 0 && pos[1] < lab.xMax) {
+            //std::cout << "Checking: " << pos[0] << ", " << pos[1] << ", " << pos[2] << "\n";
+
             if (loopCheck.contains(pos)) {
                 loopCount++;
-                std::cout << "Loop found! loopCount: " << loopCount << "\n";
+                std::cout << "Loop FOUND!: " << pos[0] << ", " << pos[1] << ", " << pos[2] << "\n";
+                std::cout << "loopCount: " << loopCount << "\n\n\n";
                 break;
             }
             loopCheck.insert(pos);
 
             if (pos[2] == UP) {
                 if (lab.grid[pos[0] - 1][pos[1]] == '#') {
-                    pos[2]  = RIGHT;
+                    pos[2] = RIGHT;
                 } else {
                     pos[0]--;
                 }
-            } else if (pos[2]  == RIGHT) {
+            } else if (pos[2] == RIGHT) {
                 if (lab.grid[pos[0]][pos[1] + 1] == '#') {
-                    pos[2]  = DOWN;
+                    pos[2] = DOWN;
                 } else {
                     pos[1]++;
                 }
-            } else if (pos[2]  == DOWN) {
+            } else if (pos[2] == DOWN) {
                 if (lab.grid[pos[0] + 1][pos[1]] == '#') {
-                    pos[2]  = LEFT;
+                    pos[2] = LEFT;
                 } else {
                     pos[0]++;
                 }
-            } else if (pos[2]  == LEFT) {
+            } else if (pos[2] == LEFT) {
                 if (lab.grid[pos[0]][pos[1] - 1] == '#') {
-                    pos[2]  = UP;
+                    pos[2] = UP;
                 } else {
                     pos[1]--;
                 }
@@ -116,8 +140,6 @@ int countLoops(Lab& lab, const std::set<std::array<int, 3>>& obstaclePos) {
         }
 
         // Return grid back to normal!!
-        iter++;
-        std::cout << "Iterations so far: " << iter++ << "\n";
         lab.grid[posBackup[0]][posBackup[1]] = '.';
     }
 
