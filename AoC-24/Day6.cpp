@@ -44,7 +44,7 @@ Lab readFile(const std::string& path) {
 
     if (!file.is_open()) {
         std::cerr << "Failed to open file!" << std::endl;
-        return Lab(grid);  // Return empty Lab
+        return Lab(grid);
     }
 
     std::string str;
