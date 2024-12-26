@@ -23,6 +23,7 @@ public static int getAbsDiff(List<String> locations) {
     for (int i = 0; i < list1.size(); i++) {
         sum += Math.abs(list1.get(i) - list2.get(i));
     }
+
     return sum;
 }
 
@@ -48,6 +49,7 @@ public static int getSimilarity(List<String> locations) {
     for (Integer num : list1) {
         sum += num * freq_dict.get(num);
     }
+
     return sum;
 }
 
