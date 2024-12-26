@@ -12,10 +12,10 @@ public static boolean safetyCheck(int[] report) {
     for (int i = 1; i < report.length; i++) {
         int diff = report[i] - report[i - 1];
         if (Math.abs(diff) < 1 || Math.abs(diff) > 3) {
-            return false;  // Invalid step size
+            return false;
         }
-        if (diff <= 0) asc = false;   // Not increasing
-        if (diff >= 0) desc = false;  // Not decreasing
+        if (diff <= 0) asc = false;
+        if (diff >= 0) desc = false;
     }
 
     return asc || desc;
@@ -31,15 +31,13 @@ public static List<Integer> noSafeReports(Path path) throws IOException {
             int[] report = new int[split_line.length];
 
             for (int i = 0; i < split_line.length; i++) {
-                report[i] = Integer.parseInt(split_line[i]); // Converting strings to ints
+                report[i] = Integer.parseInt(split_line[i]);
             }
 
             if (safetyCheck(report)) {
                 std_reports++;
             } else {
                 int[][] combinations = new int[report.length][report.length - 1];
-
-                // Iterate through report skipping one value, append vals to combinations[i][idx]
                 for (int i = 0; i < report.length; i++) {
                     int idx = 0;
                     for (int j = 0; j < report.length; j++) {

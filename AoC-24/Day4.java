@@ -11,7 +11,6 @@ public static char[][] fileToArray(String path) {
     try (BufferedReader reader = Files.newBufferedReader(Path.of(path))) {
         String line;
         int j = 0;
-
         while ((line = reader.readLine()) != null) {
             for (int i = 0; i < line.length(); i++) {
                 input[j][i] = line.charAt(i);
@@ -31,12 +30,10 @@ public static List<String> getWordSearch(String path) {
     int size = input.length;
     int length = input[0].length;
 
-    // Get rows
+    // Getting rows and columns
     List<String> wordSearch = Arrays.stream(input)
-            .map(String::new) // Converts each char[] object from stream into a string
-            .collect(Collectors.toCollection(ArrayList::new)); // Collects each strings and adds to a mutable list
-
-    // Get columns
+            .map(String::new)
+            .collect(Collectors.toCollection(ArrayList::new));
     for (int i = 0; i < length; i++) {
         StringBuilder col = new StringBuilder(size);
         for (char[] chars : input) {
@@ -53,19 +50,16 @@ public static List<String> getWordSearch(String path) {
         }
     }
 
-    // Add new matrix to list so diagonals are obtained from normal and rotated matrices
     List<char[][]> inputList = new ArrayList<>();
     inputList.add(input);
     inputList.add(inputRotated);
 
     for (var matrix : inputList) {
-        // Getting diagonals from LHS to bottom
+        // Getting diagonals from LHS to BOTTOM
         for (int i = 4; i <= size; i++) {
             int j = 0;
             int start = size - i;
             StringBuilder diagonal = new StringBuilder(size);
-
-            // Iterate through diagonal
             while (start != size) {
                 diagonal.append(matrix[start][j]);
                 start++;
@@ -75,13 +69,11 @@ public static List<String> getWordSearch(String path) {
             wordSearch.add(diagonal.toString());
         }
 
-        // Getting diagonals from top to RHS
+        // Getting diagonals from TOP to RHS
         for (int i = 4; i <= size - 1; i++) {
             int start = size - i;
             int j = 0;
             StringBuilder diagonal = new StringBuilder(size);
-
-            // Iterate through diagonal
             while (start != size) {
                 diagonal.append(matrix[j][start]);
                 start++;
@@ -105,7 +97,6 @@ public static int getXmasCount(String path) {
             xmasCount++;
             index += "XMAS".length();
         }
-
         index = 0;
         while ((index = str.indexOf("SAMX", index)) != -1) {
             xmasCount++;

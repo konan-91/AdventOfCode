@@ -60,7 +60,6 @@ public static List<List<Integer>> getArrays(Path path) {
 public static Map<Integer, List<Integer>> getRulesMap(Path path) {
     Map<Integer, List<Integer>> rulesMap = new HashMap<>();
     List<List<Integer>> rulesList = getRules(path);
-
     for (List<Integer> rule : rulesList) {
         rulesMap.computeIfAbsent(rule.get(0), _ -> new ArrayList<>()).add(rule.get(1));
     }
@@ -76,14 +75,14 @@ public static List<Integer> sumUpdates(Path path){
     List<List<Integer>> arraysList = getArrays(path);
     List<List<Integer>> invalidArraysList = new ArrayList<>();
 
-    outer: // Verify arrays do not break rules then sum middle values
+    outer: // Verify arrays do not break rules, sum middle values
     for (var array : arraysList) {
         for (int i = array.size() - 1; i > 0; i--) {
             List<Integer> illegalVals = rulesMap.get(array.get(i));
             for (int j = i; j >= 0; j--) {
                 if (illegalVals.contains(array.get(j))) {
-                    invalidArraysList.add(array); // Record invalid arrays for pt.2
-                    continue outer; // Skip array if not valid
+                    invalidArraysList.add(array);
+                    continue outer;
                 }
             }
         }
@@ -95,13 +94,12 @@ public static List<Integer> sumUpdates(Path path){
     for (var array : invalidArraysList) {
         for (int i = array.size() - 1; i > 0; i--) {
             int j = i - 1;
-
             while (j >= 0) {
                 if (rulesMap.get(array.get(i)).contains(array.get(j))) {
                     int iCopy = array.get(i); // Swap values at pointers
                     array.set(i, array.get(j));
                     array.set(j, iCopy);
-                    j = i - 1; // Reset j
+                    j = i - 1;
                     continue;
                 }
 
