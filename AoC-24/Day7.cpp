@@ -56,40 +56,19 @@ std::vector<std::vector<long>> openFile(const std::string& path) {
     return equations;
 }
 
-// TODO: Study C answer as it shows error perfectly.
-bool equationCheck(const std::vector<long>& equation, int pos, long testVal) {
-    long testValBackup;
-    int posBackup;
-    int divCount = 0;
+bool equationCheck(const std::vector<long>& equation, const int pos, const long testVal) {
 
-    while (pos > 1) {
+    if (pos <= 1) {
+        return (testVal - equation[1]) == 0;
+    }
 
-        if (testVal % equation[pos] == 0) {
-            testValBackup = testVal - equation[pos];
-            testVal /= equation[pos];
-
-            pos--;
-            posBackup = pos;
-
-            divCount++;
-
-        } else {
-            testVal -= equation[pos];
-            pos--;
+    if (testVal % equation[pos] == 0) {
+        if (equationCheck(equation, pos - 1, testVal / equation[pos])) {
+            return true;
         }
     }
 
-    if (testVal - equation[1] == 0) {
-        return true;
-    }
-
-    // if we made a pass with no divides and still didn't get 0, we can safely return false as there are no other options.
-    if (divCount == 0) {
-        return false;
-    }
-
-    // If divide didn't work, try the equation again but pass in starting values as if you had (-) instead of (/)
-    return equationCheck(equation, posBackup, testValBackup);
+    return equationCheck(equation, pos - 1, testVal - equation[pos]);
 }
 
 bool concatenateCheck(const std::vector<long>& equation, int pos, long testVal) {
