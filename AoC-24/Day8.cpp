@@ -34,7 +34,7 @@ Grid readFile(const std::string& path) {
 std::set<char> uniqueChars(const Grid& city) {
     std::set<char> charSet;
     for (const auto& row : city) {
-        for (char c : row) {
+        for (const auto& c : row) {
             if (c != '.') {
                 charSet.insert(c);
             }
@@ -65,6 +65,7 @@ std::set<Position> collectAntinodes(const Grid& city, const char& target) {
     const std::vector<Position> antennaPos = antennaPositions(city, target);
     std::set<Position> antinodeSet;
 
+    // Finding a pair of antinodes for each antenna combination
     if (antennaPos.size() > 1) {
         for (int i = 0; i < antennaPos.size() - 1; i++) {
             for (int j = i + 1; j < antennaPos.size(); j++) {
@@ -94,31 +95,28 @@ std::set<Position> collectHarmonicAntinodes(const Grid& city, const char& target
     std::vector<Position> antennaPos = antennaPositions(city, target);
 
     if (antennaPos.size() > 1) {
-        // Each antenna is itself an antinode.
-        for (auto [y, x] : antennaPos) {
+        // Each antenna is itself an antinode
+        for (const auto& [y, x] : antennaPos) {
             antinodeSet.insert(std::make_pair(y, x));
         }
 
+        // Calculating antinodes for each combination until out of bounds
         for (int i = 0; i < antennaPos.size() - 1; i++) {
             for (int j = i + 1; j < antennaPos.size(); j++) {
-                int y_dist = antennaPos[j].first - antennaPos[i].first;
-                int x_dist = antennaPos[j].second - antennaPos[i].second;
+                const int y_dist = antennaPos[j].first - antennaPos[i].first;
+                const int x_dist = antennaPos[j].second - antennaPos[i].second;
 
                 int antinode_y = antennaPos[i].first - y_dist;
                 int antinode_x = antennaPos[i].second - x_dist;
-
                 while (isInBounds(antinode_y, antinode_x, city)) {
                     antinodeSet.insert(std::make_pair(antinode_y, antinode_x));
-
 
                     antinode_y -= y_dist;
                     antinode_x -= x_dist;
                 }
 
-
                 antinode_y = antennaPos[j].first + y_dist;
                 antinode_x = antennaPos[j].second + x_dist;
-
                 while (isInBounds(antinode_y, antinode_x, city)) {
                     antinodeSet.insert(std::make_pair(antinode_y, antinode_x));
 
@@ -132,20 +130,18 @@ std::set<Position> collectHarmonicAntinodes(const Grid& city, const char& target
     return antinodeSet;
 }
 
-
-
 int main() {
     const Grid city = readFile("AoC-24/input_files/day_8/input.txt");
     const std::set<char> charSet = uniqueChars(city);
     std::set<Position> antinodeSet;
 
-    for (char c : charSet) {
+    for (const char& c : charSet) {
         auto result = collectAntinodes(city, c);
         antinodeSet.insert(result.begin(), result.end());
     }
     std::cout << "Unique positions containing antinodes: " << antinodeSet.size() << "\n";
 
-    for (char c : charSet) {
+    for (const char& c : charSet) {
         auto result = collectHarmonicAntinodes(city, c);
         antinodeSet.insert(result.begin(), result.end());
     }
