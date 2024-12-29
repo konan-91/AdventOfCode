@@ -56,9 +56,7 @@ std::vector<std::vector<long>> openFile(const std::string& path) {
     return equations;
 }
 
-// TODO: rewrite not to be backwards, as this makes it extremely difficult to concatenate.
 bool equationCheck(const std::vector<long>& equation, const long position, const long total, const long& endIdx) {
-
     if (position == endIdx) {
         return (total + equation[endIdx] == equation[0] || total * equation[endIdx] == equation[0]);
     }
@@ -79,7 +77,6 @@ std::pair<long, long> calibrationSum(const std::vector<std::vector<long>>& equat
     long concatenateSum = 0;
 
     for (auto equation : equations) {
-
         if (equationCheck(equation, 2, equation[1], equation.size() - 1)) {
             sum += equation[0];
         }
