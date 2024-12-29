@@ -1,4 +1,5 @@
 // Advent Of Code 2024++, Day 8.
+// https://adventofcode.com/2024/day/8
 
 #include <fstream>
 #include <iostream>
@@ -27,6 +28,12 @@ std::vector<std::vector<char>> readFile(const std::string& path) {
 }
 
 // TODO: everything! Work in progress.
+int countAntinodePositions(std::vector<std::vector<char>> city) {
+    //
+
+    return 0;
+}
+
 
 int main() {
     auto result = readFile("AoC-24/input_files/day_8/input.txt");
