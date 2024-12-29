@@ -1,14 +1,16 @@
 // Advent Of Code 2024++, Day 8.
 // https://adventofcode.com/2024/day/8
-// TODO: complete pt.2
 
 #include <fstream>
 #include <iostream>
 #include <set>
 
-std::vector<std::vector<char>> readFile(const std::string& path) {
+using Grid = std::vector<std::vector<char>>;
+using Position = std::pair<int, int>;
+
+Grid readFile(const std::string& path) {
     std::ifstream file(path);
-    std::vector<std::vector<char>> city;
+    Grid city;
     city.reserve(50);
 
     if (!file.is_open()) {
@@ -26,27 +28,12 @@ std::vector<std::vector<char>> readFile(const std::string& path) {
         city.push_back(line);
     }
 
-    std::vector<std::vector<char>> cityTest = {
-        {'.','.','.','.','.','.','.','.','.','.','.','.'},
-        {'.','.','.','.','.','.','.','.','0','.','.','.'},
-        {'.','.','.','.','.','0','.','.','.','.','.','.'},
-        {'.','.','.','.','.','.','.','0','.','.','.','.'},
-        {'.','.','.','.','0','.','.','.','.','.','.','.'},
-        {'.','.','.','.','.','.','A','.','.','.','.','.'},
-        {'.','.','.','.','.','.','.','.','.','.','.','.'},
-        {'.','.','.','.','.','.','.','.','.','.','.','.'},
-        {'.','.','.','.','.','.','.','.','A','.','.','.'},
-        {'.','.','.','.','.','.','.','.','.','A','.','.'},
-        {'.','.','.','.','.','.','.','.','.','.','.','.'},
-        {'.','.','.','.','.','.','.','.','.','.','.','.'}
-    };
-
-    return cityTest;
+    return city;
 }
 
-std::set<char> uniqueChars(const std::vector<std::vector<char>>& city) {
+std::set<char> uniqueChars(const Grid& city) {
     std::set<char> charSet;
-    for (std::vector row : city) {
+    for (const auto& row : city) {
         for (char c : row) {
             if (c != '.') {
                 charSet.insert(c);
@@ -57,13 +44,12 @@ std::set<char> uniqueChars(const std::vector<std::vector<char>>& city) {
     return charSet;
 }
 
-std::vector<std::pair<int, int>> antennaPositions(const std::vector<std::vector<char>>& city, const char& target) {
-    std::vector<std::pair<int, int>> antennaPos;
-
+std::vector<Position> antennaPositions(const Grid& city, const char& target) {
+    std::vector<Position> antennaPos;
     for (int i = 0; i < city.size(); i++) {
         for (int j = 0; j < city[0].size(); j++) {
             if (city[i][j] == target) {
-                antennaPos.push_back(std::make_pair(i, j));
+                antennaPos.emplace_back(i, j);
             }
         }
     }
@@ -71,13 +57,48 @@ std::vector<std::pair<int, int>> antennaPositions(const std::vector<std::vector<
     return antennaPos;
 }
 
-std::set<std::pair<int, int>> collectAntinodes(const std::vector<std::vector<char>>& city, const char& target) {
-    std::set<std::pair<int, int>> antinodeSet;
-    std::vector<std::pair<int, int>> antennaPos = antennaPositions(city, target);
+bool isInBounds(const int& y, const int& x, const Grid& city) {
+    return y >= 0 && y < city.size() && x >= 0 && x < city[0].size();
+}
 
-    // Step 2: Iterate through antenna list and get distance to every other list
-    //         Add antinode to antinodeSet at inverse of distance if in bounds
+std::set<Position> collectAntinodes(const Grid& city, const char& target) {
+    const std::vector<Position> antennaPos = antennaPositions(city, target);
+    std::set<Position> antinodeSet;
+
     if (antennaPos.size() > 1) {
+        for (int i = 0; i < antennaPos.size() - 1; i++) {
+            for (int j = i + 1; j < antennaPos.size(); j++) {
+                const int y_dist = antennaPos[j].first - antennaPos[i].first;
+                const int x_dist = antennaPos[j].second - antennaPos[i].second;
+
+                int antinode_y = antennaPos[i].first - y_dist;
+                int antinode_x = antennaPos[i].second - x_dist;
+                if (isInBounds(antinode_y, antinode_x, city)) {
+                    antinodeSet.insert(std::make_pair(antinode_y, antinode_x));
+                }
+
+                antinode_y = antennaPos[j].first + y_dist;
+                antinode_x = antennaPos[j].second + x_dist;
+                if (isInBounds(antinode_y, antinode_x, city)) {
+                    antinodeSet.insert(std::make_pair(antinode_y, antinode_x));
+                }
+            }
+        }
+    }
+
+    return antinodeSet;
+}
+
+std::set<Position> collectHarmonicAntinodes(const Grid& city, const char& target) {
+    std::set<Position> antinodeSet;
+    std::vector<Position> antennaPos = antennaPositions(city, target);
+
+    if (antennaPos.size() > 1) {
+        // Each antenna is itself an antinode.
+        for (auto [y, x] : antennaPos) {
+            antinodeSet.insert(std::make_pair(y, x));
+        }
+
         for (int i = 0; i < antennaPos.size() - 1; i++) {
             for (int j = i + 1; j < antennaPos.size(); j++) {
                 int y_dist = antennaPos[j].first - antennaPos[i].first;
@@ -85,85 +106,48 @@ std::set<std::pair<int, int>> collectAntinodes(const std::vector<std::vector<cha
 
                 int antinode_y = antennaPos[i].first - y_dist;
                 int antinode_x = antennaPos[i].second - x_dist;
-                if (antinode_y >= 0 && antinode_y < city.size() && antinode_x >= 0 && antinode_x < city[0].size()) {
+
+                while (isInBounds(antinode_y, antinode_x, city)) {
                     antinodeSet.insert(std::make_pair(antinode_y, antinode_x));
+
+
+                    antinode_y -= y_dist;
+                    antinode_x -= x_dist;
                 }
+
 
                 antinode_y = antennaPos[j].first + y_dist;
                 antinode_x = antennaPos[j].second + x_dist;
-                if (antinode_y >= 0 && antinode_y < city.size() && antinode_x >= 0 && antinode_x < city[0].size()) {
+
+                while (isInBounds(antinode_y, antinode_x, city)) {
                     antinodeSet.insert(std::make_pair(antinode_y, antinode_x));
+
+                    antinode_y += y_dist;
+                    antinode_x += x_dist;
                 }
             }
         }
     }
 
-    return antinodeSet;
-}
-
-std::set<std::pair<int, int>> collectHarmonicAntinodes(const std::vector<std::vector<char>>& city, const char& target) {
-    std::set<std::pair<int, int>> antinodeSet;
-    std::vector<std::pair<int, int>> antennaPos = antennaPositions(city, target);
-
-    // Step 2: Iterate through antenna list and get distance to every other list
-    //         Add antinode to antinodeSet at inverse of distance if in bounds
-    if (antennaPos.size() > 1) {
-        std::cout << "\n\nAntennaPos.size() == " << antennaPos.size() << "\n";
-
-        for (int i = 0; i < antennaPos.size() - 1; i++) {
-            for (int j = i + 1; j < antennaPos.size(); j++) {
-
-                std::cout << "\nFinding distance between " << antennaPos[i].first << ", " << antennaPos[i].second << " and ";
-                std::cout << antennaPos[j].first << ", " << antennaPos[j].second << " -- " << city[antennaPos[i].first][antennaPos[i].second] <<"\n";
-
-                int y_dist = antennaPos[j].first - antennaPos[i].first;
-                int x_dist = antennaPos[j].second - antennaPos[i].second;
-                std::cout << "Distance == (" << y_dist << ", " << x_dist << ")\n";
-
-                int antinode_y = antennaPos[i].first - y_dist;  // pt.2, This needs to be done in a loop until out of bounds.
-                int antinode_x = antennaPos[i].second - x_dist;
-                std::cout << "Antinode position: (" << antinode_y << ", " << antinode_x << ")\n";
-
-                if (antinode_y >= 0 && antinode_y < city.size() && antinode_x >= 0 && antinode_x < city[0].size()) {
-                    antinodeSet.insert(std::make_pair(antinode_y, antinode_x));
-                    std::cout << "Antinode1 added!\n";
-                } else {
-                    std::cout << "Antinode1 NOT IN BOUNDS!\n";
-                }                                               // until here.
-
-                antinode_y = antennaPos[j].first + y_dist;
-                antinode_x = antennaPos[j].second + x_dist;
-                std::cout << "2nd antinode position: (" << antinode_y << ", " << antinode_x << ")\n";
-
-                if (antinode_y >= 0 && antinode_y < city.size() && antinode_x >= 0 && antinode_x < city[0].size()) {
-                    antinodeSet.insert(std::make_pair(antinode_y, antinode_x));
-                    std::cout << "Antinode2 added!\n";
-                } else {
-                    std::cout << "Antinode2 NOT IN BOUNDS!\n";
-                }
-            }
-        }
-    }
-    std::cout << "TOTAL UNIQUE ANTINODES FOR " << target << ": " << antinodeSet.size() << "\n";
     return antinodeSet;
 }
 
 
 
 int main() {
-    std::vector<std::vector<char>> city = readFile("AoC-24/input_files/day_8/input.txt");
-    std::set<std::pair<int, int>> antinodeSet;
-    std::set<char> charSet = uniqueChars(city);
+    const Grid city = readFile("AoC-24/input_files/day_8/input.txt");
+    const std::set<char> charSet = uniqueChars(city);
+    std::set<Position> antinodeSet;
 
     for (char c : charSet) {
         auto result = collectAntinodes(city, c);
         antinodeSet.insert(result.begin(), result.end());
     }
-    std::cout << "\n" << antinodeSet.size() << "\n";
+    std::cout << "Unique positions containing antinodes: " << antinodeSet.size() << "\n";
 
     for (char c : charSet) {
         auto result = collectHarmonicAntinodes(city, c);
         antinodeSet.insert(result.begin(), result.end());
     }
-    std::cout << "\n" << antinodeSet.size() << "\n";
+    std::cout << "Using resonant harmonics ruleset: " << antinodeSet.size() << "\n";
 }
