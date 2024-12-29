@@ -1,4 +1,5 @@
 // Advent Of Code 2024, Day 2.
+// https://adventofcode.com/2024/day/2
 
 import java.io.BufferedReader;
 import java.io.IOException;

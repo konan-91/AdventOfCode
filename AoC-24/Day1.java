@@ -1,4 +1,5 @@
 // Advent Of Code 2024, Day 1.
+// https://adventofcode.com/2024/day/1
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public static int getAbsDiff(List<String> locations) {
+public static int absoluteDifference(List<String> locations) {
     List<Integer> list1 = new ArrayList<>();
     List<Integer> list2 = new ArrayList<>();
 
@@ -29,7 +30,7 @@ public static int getAbsDiff(List<String> locations) {
     return sum;
 }
 
-public static int getSimilarity(List<String> locations) {
+public static int similarityScore(List<String> locations) {
     List<Integer> list1 = new ArrayList<>();
     List<Integer> list2 = new ArrayList<>();
 
@@ -57,6 +58,6 @@ public static int getSimilarity(List<String> locations) {
 
 public static void main() throws IOException {
     List<String> locations = Files.readAllLines(Path.of("AoC-24/input_files/day_1/input.txt"));
-    System.out.printf("Sum: %d%n", getAbsDiff(locations));
-    System.out.printf("Similarity: %d%n", getSimilarity(locations));
+    System.out.printf("Sum: %d%n", absoluteDifference(locations));
+    System.out.printf("Similarity: %d%n", similarityScore(locations));
 }

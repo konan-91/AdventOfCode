@@ -1,4 +1,5 @@
 // Advent Of Code 2024, Day 3.
+// https://adventofcode.com/2024/day/3
 
 import java.io.IOException;
 import java.nio.file.Files;
