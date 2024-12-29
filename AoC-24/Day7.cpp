@@ -37,7 +37,7 @@ std::vector<std::vector<long>> openFile(const std::string& path) {
             equations.push_back(nums);
         }
     } else {
-        std::cerr << "File open unsuccessful!";
+        std::cerr << "File could not be opened!";
     }
 
     // test input
@@ -56,22 +56,21 @@ std::vector<std::vector<long>> openFile(const std::string& path) {
     return equations;
 }
 
-bool equationCheck(const std::vector<long>& equation, const int pos, const long testVal) {
+// TODO: rewrite not to be backwards, as this makes it extremely difficult to concatenate.
+bool equationCheck(const std::vector<long>& equation, const long position, const long total, const long& endIdx) {
 
-    if (pos <= 1) {
-        return (testVal - equation[1]) == 0;
+    if (position == endIdx) {
+        return (total + equation[endIdx] == equation[0] || total * equation[endIdx] == equation[0]);
     }
 
-    if (testVal % equation[pos] == 0) {
-        if (equationCheck(equation, pos - 1, testVal / equation[pos])) {
-            return true;
-        }
+    if (equationCheck(equation, position + 1, total * equation[position], endIdx)) {
+        return true;
     }
 
-    return equationCheck(equation, pos - 1, testVal - equation[pos]);
+    return equationCheck(equation, position + 1, total + equation[position], endIdx);
 }
 
-bool concatenateCheck(const std::vector<long>& equation, int pos, long testVal) {
+bool concatenateCheck(const std::vector<long>& equation, long position, long total, long endIdx) {
     return false;
 }
 
@@ -80,14 +79,12 @@ std::pair<long, long> calibrationSum(const std::vector<std::vector<long>>& equat
     long concatenateSum = 0;
 
     for (auto equation : equations) {
-        int startPos = equation.size() - 1;
-        long testVal = equation[0];
 
-        if (equationCheck(equation, startPos, testVal)) {
+        if (equationCheck(equation, 2, equation[1], equation.size() - 1)) {
             sum += equation[0];
         }
 
-        if (concatenateCheck(equation, startPos, testVal)) {
+        if (concatenateCheck(equation, 2, equation[1], equation.size() - 1)) {
             concatenateSum += equation[0];
         }
     }
