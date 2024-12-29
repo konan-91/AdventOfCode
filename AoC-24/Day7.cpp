@@ -1,6 +1,5 @@
 // Advent Of Code 2024++, Day 7.
 
-#include <array>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -14,19 +13,15 @@ std::vector<std::vector<long>> openFile(const std::string& path) {
     if (file.is_open()) {
         std::string line;
         while (std::getline(file, line)) {
-            // String for each line from here
             std::vector<long> nums;
             nums.reserve(15);
             std::string token;
             std::stringstream stream(line);
 
-            // Splitting the string in half around the ':'
             while (std::getline(stream, token, ':')) {
-                // Now we have a string with only numbers separated by space
                 std::stringstream innerStream(token);
                 std::string num;
 
-                // Get the number from the stream
                 while (std::getline(innerStream, num, ' ')) {
                     if (!num.empty()) {
                         nums.push_back(std::stoll(num));
@@ -39,19 +34,6 @@ std::vector<std::vector<long>> openFile(const std::string& path) {
     } else {
         std::cerr << "File could not be opened!";
     }
-
-    // test input
-    std::vector<std::vector<long>> testequations = {
-        {190L, 10L, 19L},
-        {3267L, 81L, 40L, 27L},
-        {83L, 17L, 5L},
-        {156L, 15L, 6L},
-        {7290L, 6L, 8L, 6L, 15L},
-        {161011L, 16L, 10L, 13L},
-        {192L, 17L, 8L, 14L},
-        {21037L, 9L, 7L, 18L, 13L},
-        {292L, 11L, 6L, 16L, 20L}
-    };
 
     return equations;
 }
@@ -68,8 +50,23 @@ bool equationCheck(const std::vector<long>& equation, const long position, const
     return equationCheck(equation, position + 1, total + equation[position], endIdx);
 }
 
-bool concatenateCheck(const std::vector<long>& equation, long position, long total, long endIdx) {
-    return false;
+bool concatenateCheck(const std::vector<long>& equation, const long position, const long total, const long& endIdx) {
+    const std::string str_concatenation = std::to_string(total) + std::to_string(equation[position]);
+    const long concatenation = std::stoll(str_concatenation);
+
+    if (position == endIdx) {
+        return (total + equation[endIdx] == equation[0] || total * equation[endIdx] == equation[0] || concatenation == equation[0]);
+    }
+
+    if (concatenateCheck(equation, position + 1, total * equation[position], endIdx)) {
+        return true;
+    }
+
+    if (concatenateCheck(equation, position + 1, concatenation, endIdx)) {
+        return true;
+    }
+
+    return concatenateCheck(equation, position + 1, total + equation[position], endIdx);
 }
 
 std::pair<long, long> calibrationSum(const std::vector<std::vector<long>>& equations) {
@@ -92,6 +89,6 @@ std::pair<long, long> calibrationSum(const std::vector<std::vector<long>>& equat
 int main() {
     std::vector<std::vector<long>> input = openFile("AoC-24/input_files/day_7/input.txt");
     auto [calibration, concatenation] = calibrationSum(input);
-    std::cout << "Total calibration result: " << calibration << "\n";
-    std::cout << "Total calibration result with concatenation: " << concatenation << "\n";
+    std::cout << "Sum of calibration results: " << calibration << "\n";
+    std::cout << "Sum including concatenation: " << concatenation << "\n";
 }
