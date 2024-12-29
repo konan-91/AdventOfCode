@@ -57,7 +57,7 @@ std::vector<Position> antennaPositions(const Grid& city, const char& target) {
     return antennaPos;
 }
 
-bool isInBounds(const int& y, const int& x, const Grid& city) {
+bool isInBounds(int y, int x, const Grid& city) {
     return y >= 0 && y < city.size() && x >= 0 && x < city[0].size();
 }
 
@@ -75,13 +75,13 @@ std::set<Position> collectAntinodes(const Grid& city, const char& target) {
                 int antinode_y = antennaPos[i].first - y_dist;
                 int antinode_x = antennaPos[i].second - x_dist;
                 if (isInBounds(antinode_y, antinode_x, city)) {
-                    antinodeSet.insert(std::make_pair(antinode_y, antinode_x));
+                    antinodeSet.emplace(antinode_y, antinode_x);
                 }
 
                 antinode_y = antennaPos[j].first + y_dist;
                 antinode_x = antennaPos[j].second + x_dist;
                 if (isInBounds(antinode_y, antinode_x, city)) {
-                    antinodeSet.insert(std::make_pair(antinode_y, antinode_x));
+                    antinodeSet.emplace(antinode_y, antinode_x);
                 }
             }
         }
@@ -91,15 +91,10 @@ std::set<Position> collectAntinodes(const Grid& city, const char& target) {
 }
 
 std::set<Position> collectHarmonicAntinodes(const Grid& city, const char& target) {
-    std::set<Position> antinodeSet;
     std::vector<Position> antennaPos = antennaPositions(city, target);
+    std::set<Position> antinodeSet(antennaPos.begin(), antennaPos.end());
 
     if (antennaPos.size() > 1) {
-        // Each antenna is itself an antinode
-        for (const auto& [y, x] : antennaPos) {
-            antinodeSet.insert(std::make_pair(y, x));
-        }
-
         // Calculating antinodes for each combination until out of bounds
         for (int i = 0; i < antennaPos.size() - 1; i++) {
             for (int j = i + 1; j < antennaPos.size(); j++) {
@@ -109,7 +104,7 @@ std::set<Position> collectHarmonicAntinodes(const Grid& city, const char& target
                 int antinode_y = antennaPos[i].first - y_dist;
                 int antinode_x = antennaPos[i].second - x_dist;
                 while (isInBounds(antinode_y, antinode_x, city)) {
-                    antinodeSet.insert(std::make_pair(antinode_y, antinode_x));
+                    antinodeSet.emplace(antinode_y, antinode_x);
 
                     antinode_y -= y_dist;
                     antinode_x -= x_dist;
@@ -118,7 +113,7 @@ std::set<Position> collectHarmonicAntinodes(const Grid& city, const char& target
                 antinode_y = antennaPos[j].first + y_dist;
                 antinode_x = antennaPos[j].second + x_dist;
                 while (isInBounds(antinode_y, antinode_x, city)) {
-                    antinodeSet.insert(std::make_pair(antinode_y, antinode_x));
+                    antinodeSet.emplace(antinode_y, antinode_x);
 
                     antinode_y += y_dist;
                     antinode_x += x_dist;
