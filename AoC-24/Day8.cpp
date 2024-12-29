@@ -1,5 +1,6 @@
 // Advent Of Code 2024++, Day 8.
 // https://adventofcode.com/2024/day/8
+// TODO: complete pt.2
 
 #include <fstream>
 #include <iostream>
@@ -56,11 +57,9 @@ std::set<char> uniqueChars(const std::vector<std::vector<char>>& city) {
     return charSet;
 }
 
-std::set<std::pair<int, int>> collectAntinodes(const std::vector<std::vector<char>>& city, const char& target) {
-    std::set<std::pair<int, int>> antinodeSet;
+std::vector<std::pair<int, int>> antennaPositions(const std::vector<std::vector<char>>& city, const char& target) {
     std::vector<std::pair<int, int>> antennaPos;
 
-    // Step 1: Iterate through city and find coordinates of every 'char'.
     for (int i = 0; i < city.size(); i++) {
         for (int j = 0; j < city[0].size(); j++) {
             if (city[i][j] == target) {
@@ -68,6 +67,43 @@ std::set<std::pair<int, int>> collectAntinodes(const std::vector<std::vector<cha
             }
         }
     }
+
+    return antennaPos;
+}
+
+std::set<std::pair<int, int>> collectAntinodes(const std::vector<std::vector<char>>& city, const char& target) {
+    std::set<std::pair<int, int>> antinodeSet;
+    std::vector<std::pair<int, int>> antennaPos = antennaPositions(city, target);
+
+    // Step 2: Iterate through antenna list and get distance to every other list
+    //         Add antinode to antinodeSet at inverse of distance if in bounds
+    if (antennaPos.size() > 1) {
+        for (int i = 0; i < antennaPos.size() - 1; i++) {
+            for (int j = i + 1; j < antennaPos.size(); j++) {
+                int y_dist = antennaPos[j].first - antennaPos[i].first;
+                int x_dist = antennaPos[j].second - antennaPos[i].second;
+
+                int antinode_y = antennaPos[i].first - y_dist;
+                int antinode_x = antennaPos[i].second - x_dist;
+                if (antinode_y >= 0 && antinode_y < city.size() && antinode_x >= 0 && antinode_x < city[0].size()) {
+                    antinodeSet.insert(std::make_pair(antinode_y, antinode_x));
+                }
+
+                antinode_y = antennaPos[j].first + y_dist;
+                antinode_x = antennaPos[j].second + x_dist;
+                if (antinode_y >= 0 && antinode_y < city.size() && antinode_x >= 0 && antinode_x < city[0].size()) {
+                    antinodeSet.insert(std::make_pair(antinode_y, antinode_x));
+                }
+            }
+        }
+    }
+
+    return antinodeSet;
+}
+
+std::set<std::pair<int, int>> collectHarmonicAntinodes(const std::vector<std::vector<char>>& city, const char& target) {
+    std::set<std::pair<int, int>> antinodeSet;
+    std::vector<std::pair<int, int>> antennaPos = antennaPositions(city, target);
 
     // Step 2: Iterate through antenna list and get distance to every other list
     //         Add antinode to antinodeSet at inverse of distance if in bounds
@@ -84,7 +120,7 @@ std::set<std::pair<int, int>> collectAntinodes(const std::vector<std::vector<cha
                 int x_dist = antennaPos[j].second - antennaPos[i].second;
                 std::cout << "Distance == (" << y_dist << ", " << x_dist << ")\n";
 
-                int antinode_y = antennaPos[i].first - y_dist;
+                int antinode_y = antennaPos[i].first - y_dist;  // pt.2, This needs to be done in a loop until out of bounds.
                 int antinode_x = antennaPos[i].second - x_dist;
                 std::cout << "Antinode position: (" << antinode_y << ", " << antinode_x << ")\n";
 
@@ -93,7 +129,7 @@ std::set<std::pair<int, int>> collectAntinodes(const std::vector<std::vector<cha
                     std::cout << "Antinode1 added!\n";
                 } else {
                     std::cout << "Antinode1 NOT IN BOUNDS!\n";
-                }
+                }                                               // until here.
 
                 antinode_y = antennaPos[j].first + y_dist;
                 antinode_x = antennaPos[j].second + x_dist;
@@ -112,6 +148,8 @@ std::set<std::pair<int, int>> collectAntinodes(const std::vector<std::vector<cha
     return antinodeSet;
 }
 
+
+
 int main() {
     std::vector<std::vector<char>> city = readFile("AoC-24/input_files/day_8/input.txt");
     std::set<std::pair<int, int>> antinodeSet;
@@ -119,6 +157,12 @@ int main() {
 
     for (char c : charSet) {
         auto result = collectAntinodes(city, c);
+        antinodeSet.insert(result.begin(), result.end());
+    }
+    std::cout << "\n" << antinodeSet.size() << "\n";
+
+    for (char c : charSet) {
+        auto result = collectHarmonicAntinodes(city, c);
         antinodeSet.insert(result.begin(), result.end());
     }
     std::cout << "\n" << antinodeSet.size() << "\n";
