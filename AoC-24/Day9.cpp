@@ -23,7 +23,7 @@ std::vector<int> readFile(const std::string& path) {
     }
 
     std::vector inputTest = {2, 3, 3, 3, 1, 3, 3, 1, 2, 1, 4, 1, 4, 1, 3, 1, 4, 0, 2};
-    return inputTest;
+    return diskMap;
 }
 
 List expandDisk(const std::string& path) {
@@ -31,7 +31,7 @@ List expandDisk(const std::string& path) {
     const int diskMapSize = diskMap.size();
     int idNum = 0;
     List expandedMap;
-    //expandedMap.reserve(diskMapSize * 2);
+    expandedMap.reserve(diskMapSize * 2);
 
     for (int i = 0; i < diskMapSize; i += 2) {
         // Expand file memory.
@@ -75,11 +75,7 @@ List compactDisk(const std::string& path) {
             emptyCount++;
         }
     }
-    int clipIdx = compactedMapSize - emptyCount;
-
-    std::cout << "\nExpandedMapSize: " << compactedMapSize << "\n";
-    std::cout << "emptyCount: " << emptyCount << "\n";
-    std::cout << "ClipIdx: " << clipIdx << "\n";
+    const int clipIdx = compactedMapSize - emptyCount;
 
     // Two pointers: one for free space, another for the memory item to move
     int i = 0, j = compactedMapSize - 1;
@@ -109,12 +105,17 @@ List compactDisk(const std::string& path) {
 }
 
 size_t checkSum(const std::string& path) {
-    /*
+    const List compacted = compactDisk(path);
     size_t checksum = 0;
-    std::vector<char> compacted = compactDisk(path);
+
+    for (int i = 0; i < compacted.size(); i++) {
+        if (compacted[i].empty()) {
+            continue;
+        }
+        checksum += i * compacted[i][0];
+    }
 
     return checksum;
-    */
 }
 
 int main() {
@@ -133,4 +134,7 @@ int main() {
         }
     }
     std::cout << "\n";
+
+    size_t ans1 = checkSum("AoC-24/input_files/day_9/input.txt");
+    std::cout << "\nANSWER: " << ans1 << "\n";
 }
