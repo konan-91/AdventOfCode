@@ -2,13 +2,13 @@
 // https://adventofcode.com/2024/day/9
 
 // This week is a work in progress!
-// TODO: Finish part 1. Fix fileID - breaks when >9. Convert to array of array of ints, therefore ID can be > 9.
-// TODO: Possibly rewrite compactDisk function.
 
 #include <fstream>
 #include <iostream>
 
-std::vector<char> readFile(const std::string& path) {
+using List = std::vector<std::vector<int>>;
+
+std::vector<int> readFile(const std::string& path) {
     std::ifstream file(path);
     if (!file.is_open()) {
         std::cerr << "Failed to open file!" << std::endl;
@@ -17,93 +17,120 @@ std::vector<char> readFile(const std::string& path) {
 
     std::string str;
     std::getline(file, str);
-    std::vector input(str.begin(), str.end());
+    std::vector<int> diskMap;
+    for (const char c : str) {
+        diskMap.push_back(c - '0');
+    }
 
-    std::vector inputTest = {'2', '3', '3', '3', '1', '3', '3', '1', '2', '1', '4', '1', '4', '1', '3', '1', '4', '0', '2'};
-    return input;
+    std::vector inputTest = {2, 3, 3, 3, 1, 3, 3, 1, 2, 1, 4, 1, 4, 1, 3, 1, 4, 0, 2};
+    return inputTest;
 }
 
-std::vector<char> expandDisk(const std::vector<char>& input) {
-    std::vector<char> expanded;
-    expanded.reserve(input.size() * 2);
+List expandDisk(const std::string& path) {
+    const auto diskMap = readFile(path);
+    const int diskMapSize = diskMap.size();
     int idNum = 0;
+    List expandedMap;
+    //expandedMap.reserve(diskMapSize * 2);
 
-    for (int i = 0; i < input.size(); i += 2) {
+    for (int i = 0; i < diskMapSize; i += 2) {
         // Expand file memory.
-        for (int j = 0; j < static_cast<int>(input[i]) - '0'; j++) {
-            expanded.push_back(static_cast<char>(idNum) + '0'); // THIS IS WRONG! THIS IS WRONG!  THIS IS WRONG!  THIS IS WRONG!  THIS IS WRONG!
+        for (int j = 0; j < diskMap[i]; j++) {
+            expandedMap.push_back({idNum});
 
         }
         // Expand free space.
-        for (int j = 0; j < static_cast<int>(input[i + 1])  - '0'; j++) {
-            expanded.push_back('.');
+        for (int j = 0; j < diskMap[i + 1]; j++) {
+            expandedMap.push_back({});
         }
 
         idNum++;
     }
 
-    for (char c : expanded) {
-        std::cout << c;
-    }
-    std::cout << "expanded!!: " << "\n";
-
-    return expanded;
-}
-
-std::vector<char> compactDisk(const std::vector<char>& input) {
-    std::vector<char> compacted = expandDisk(input);
-
-    // Get number of digits
-    int charNum = 0;
-    for (char c : compacted) {
-        if (c == '.') {
+    // PRINTING -- TEST
+    std::cout << "\nExpanded Map\n";
+    for (auto item : expandedMap) {
+        if (item.empty()) {
+            std::cout << ".";
             continue;
         }
-        charNum++;
+
+        for (const int i : item) {
+            std::cout << i;
+        }
     }
+    std::cout << "\n";
 
-    // Two pointers: i for free space, j for files
-    int i = 0, j = compacted.size() - 1;
-    while (i < compacted.size() - 1 && j > 0) {  // THIS MAY NOT WORK! i may need to go back j, check back if it doesn't work
+    return expandedMap;
+}
 
-        while (compacted[i] != '.' && i < compacted.size() - 1) {
+List compactDisk(const std::string& path) {
+    List compactedMap = expandDisk(path);
+    const int compactedMapSize = compactedMap.size();
+
+    // Get emptyCount - number of '.' - so that we know when to stop the loop!
+    int emptyCount = 0;
+    for (auto item : compactedMap) {
+        if (item.empty()) {
+            emptyCount++;
+        }
+    }
+    int clipIdx = compactedMapSize - emptyCount;
+
+    std::cout << "\nExpandedMapSize: " << compactedMapSize << "\n";
+    std::cout << "emptyCount: " << emptyCount << "\n";
+    std::cout << "ClipIdx: " << clipIdx << "\n";
+
+    // Two pointers: one for free space, another for the memory item to move
+    int i = 0, j = compactedMapSize - 1;
+    while (emptyCount > 0) {
+        // Move i to empty space
+        while (!compactedMap[i].empty()) {
             i++;
         }
 
-        //std::cout << "Assigning: " << compacted[j] << ", to: " << compacted[i] << "\n";
-        compacted[i] = compacted[j];
-
-        j--;
-        while (compacted[j] == '.') {
-            compacted[j] = '*';
+        // Move j to memory item
+        while (compactedMap[j].empty()) {
             j--;
         }
 
+        // Move memory item to empty space
+        compactedMap[i] = compactedMap[j];
+
+        emptyCount--;
+        i++;
+        j--;
     }
 
-    // Trim array from j?
-    //std::cout << "i & j: " << i << ", " << j << "\n";
-    compacted.erase(compacted.begin() + charNum, compacted.end());
+    // Clip vector
+    compactedMap.erase(compactedMap.begin() + clipIdx, compactedMap.end());
 
-    return compacted;
+    return compactedMap;
 }
 
-size_t checkSum(const std::vector<char>& input) {
+size_t checkSum(const std::string& path) {
+    /*
     size_t checksum = 0;
-    auto compacted = compactDisk(input);
-
-    for (int i = 0; i < compacted.size(); i++) {
-        checksum += i * (compacted[i] - '0');
-        //std::cout << compacted[i];
-    }
+    std::vector<char> compacted = compactDisk(path);
 
     return checksum;
+    */
 }
 
 int main() {
-    // Move file blocks one at a time from the end of the disk to the leftmost free space block
-    std::vector<char> input = readFile("AoC-24/input_files/day_9/input.txt");
+    auto ans = compactDisk("AoC-24/input_files/day_9/input.txt");
 
-    int ans = checkSum(input);
-    std::cout << "\nAnswer: " << ans << "\n";
+    // PRINTING -- TEST
+    std::cout << "\nCompact Map\n";
+    for (auto item : ans) {
+        if (item.empty()) {
+            std::cout << ".";
+            continue;
+        }
+
+        for (const int i : item) {
+            std::cout << i;
+        }
+    }
+    std::cout << "\n";
 }
