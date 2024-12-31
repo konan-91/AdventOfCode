@@ -3,6 +3,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <numeric>
 
 using List = std::vector<std::vector<int>>;
 
@@ -24,26 +25,17 @@ std::vector<int> readFile(const std::string& path) {
 }
 
 List expandDisk(const std::string& path) {
-    const auto diskMap = readFile(path);
-    const int diskMapSize = diskMap.size();
-    int idNum = 0;
+    const auto& diskMap = readFile(path);
     List expandedMap;
-    expandedMap.reserve(diskMapSize * 2);
+    expandedMap.reserve(std::accumulate(diskMap.begin(), diskMap.end(), 0));
+    int idNum = 0;
 
-    for (int i = 0; i < diskMapSize; i += 2) {
-        // Expand file memory.
-        for (int j = 0; j < diskMap[i]; j++) {
-            expandedMap.push_back({idNum});
-
-        }
-        // Expand free space.
-        for (int j = 0; j < diskMap[i + 1]; j++) {
-            expandedMap.emplace_back();
-        }
-
-        idNum++;
+    for (size_t i = 0; i < diskMap.size(); i += 2) {
+        // Expand file memory & free space
+        expandedMap.insert(expandedMap.end(), diskMap[i], std::vector<int>{idNum});
+        expandedMap.insert(expandedMap.end(), diskMap[i + 1], std::vector<int>{});
+        ++idNum;
     }
-
     return expandedMap;
 }
 
@@ -55,7 +47,6 @@ List compactDisk(List compactedMap) {
             emptyCount++;
         }
     }
-
     const int clipIdx = compactedMapSize - emptyCount;
 
     // Two pointers: one for free space, another for the memory item to move
@@ -73,7 +64,6 @@ List compactDisk(List compactedMap) {
         i++;
         j--;
     }
-
     compactedMap.erase(compactedMap.begin() + clipIdx, compactedMap.end());
 
     return compactedMap;
@@ -83,7 +73,7 @@ List defragmentDisk(List defragmentedMap) {
     const int defragMapSize = defragmentedMap.size();
     int idNum = defragmentedMap[defragMapSize - 1][0];
 
-    // Two pointers (more complicated): find file index range and check for sufficient free space
+    // Two pointers: find file index range & check for sufficient free space
     while (idNum >= 0) {
         int i = 0, j = defragMapSize - 1;
         std::vector<int> fileRange;
@@ -125,7 +115,6 @@ List defragmentDisk(List defragmentedMap) {
                 moveFile = true;
                 break;
             }
-
             contiguousSpace = {};
         }
 
@@ -138,7 +127,6 @@ List defragmentDisk(List defragmentedMap) {
                 defragmentedMap[fileRange[j]] = {};
             }
         }
-
         idNum --;
     }
 
@@ -163,7 +151,6 @@ std::pair<size_t, size_t> checkSum(const std::string& path) {
         if (defragmented[i].empty()) {
             continue;
         }
-
         defragmentedCheckSum += i * defragmented[i][0];
     }
 
