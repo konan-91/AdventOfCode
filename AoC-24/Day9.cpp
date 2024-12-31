@@ -49,13 +49,13 @@ List expandDisk(const std::string& path) {
 
 List compactDisk(List compactedMap) {
     const int compactedMapSize = compactedMap.size();
-
     int emptyCount = 0; // Index for terminating while loop & clipping vector
     for (auto item : compactedMap) {
         if (item.empty()) {
             emptyCount++;
         }
     }
+
     const int clipIdx = compactedMapSize - emptyCount;
 
     // Two pointers: one for free space, another for the memory item to move
