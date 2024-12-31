@@ -1,8 +1,6 @@
 // Advent Of Code 2024++, Day 9.
 // https://adventofcode.com/2024/day/9
 
-// This week is a work in progress!
-
 #include <fstream>
 #include <iostream>
 
@@ -23,7 +21,7 @@ std::vector<int> readFile(const std::string& path) {
     }
 
     std::vector inputTest = {2, 3, 3, 3, 1, 3, 3, 1, 2, 1, 4, 1, 4, 1, 3, 1, 4, 0, 2};
-    return inputTest;
+    return diskMap;
 }
 
 List expandDisk(const std::string& path) {
@@ -47,27 +45,13 @@ List expandDisk(const std::string& path) {
         idNum++;
     }
 
-    // PRINTING -- TEST
-    std::cout << "\nExpanded Map\n";
-    for (auto item : expandedMap) {
-        if (item.empty()) {
-            std::cout << ".";
-            continue;
-        }
-
-        for (const int i : item) {
-            std::cout << i;
-        }
-    }
-    std::cout << "\n";
-
     return expandedMap;
 }
 
 List compactDisk(List compactedMap) {
     const int compactedMapSize = compactedMap.size();
 
-    int emptyCount = 0; // Needed for ending while loop & clipping vector
+    int emptyCount = 0; // Index for terminating while loop & clipping vector
     for (auto item : compactedMap) {
         if (item.empty()) {
             emptyCount++;
@@ -90,71 +74,74 @@ List compactDisk(List compactedMap) {
         i++;
         j--;
     }
+
     compactedMap.erase(compactedMap.begin() + clipIdx, compactedMap.end());
 
     return compactedMap;
 }
 
 List defragmentDisk(List defragmentedMap) {
-    /*
-    00...111...2...333.44.5555.6666.777.888899
-    0099.111...2...333.44.5555.6666.777.8888..
-    0099.1117772...333.44.5555.6666.....8888..
-    0099.111777244.333....5555.6666.....8888..
-    00992111777.44.333....5555.6666.....8888..
-    // Two pointers again:
-        // Get file range with j, get cont. space range with i, move j -> i
-        // If there is no space large enough, do not move it file        */
-
     const int defragMapSize = defragmentedMap.size();
     int idNum = defragmentedMap[defragMapSize - 1][0];
 
+    // Two pointers (more complicated): find file index range and check for sufficient free space
     while (idNum >= 0) {
         int i = 0, j = defragMapSize - 1;
         std::vector<int> fileRange;
         std::vector<int> contiguousSpace;
 
-        // Get file range
-        while (defragmentedMap[j][0] != idNum) {
-            j--;
-        }
-        while (defragmentedMap[j][0] == idNum) {
-            fileRange.push_back(j);
-            j--;
+        // Get index range for file
+        while (j > 0) {
+            while (defragmentedMap[j].empty()) {
+                j--;
+            }
+            while (!defragmentedMap[j].empty()) {
+                if (defragmentedMap[j][0] == idNum) {
+                    fileRange.push_back(j);
+                }
+                j--;
+            }
+
+            if (fileRange.size() > 0) {
+                break;
+            }
+
+            while (!defragmentedMap[j].empty()) {
+                j--;
+            }
         }
 
         // Check if contiguous free space matches file size
         bool moveFile = false;
-        while (i < defragMapSize) {
-            while (!defragmentedMap[i].empty()) { // This may cause an infinite loop near the end - be careful!!
+        while (i < fileRange[0]) {
+            while (!defragmentedMap[i].empty() && i < fileRange[0]) {
                 i++;
             }
-            while (defragmentedMap[i].empty()) { // This is EVEN MORE likely to cause an infinite loop!! Possibly add while i < defragMapSize to both.
+            while (defragmentedMap[i].empty() && i < fileRange[0]) {
                 contiguousSpace.push_back(i);
+                i++;
             }
 
             if (contiguousSpace.size() >= fileRange.size()) {
-                // Set flag to move file and break;
                 moveFile = true;
                 break;
             }
+
+            contiguousSpace = {};
         }
 
         // If there is contiguous free space available, move the file! also set origin pos to '.'
         if (moveFile) {
-            for (int i = 0; i < contiguousSpace.size() - 1; i++) {
-                defragmentedMap[contiguousSpace[i]][0] = idNum; // Set empty space to idNum
+            for (int i = 0; i < fileRange.size(); i++) {
+                defragmentedMap[contiguousSpace[i]] = {idNum}; // Set empty space to idNum
             }
-            for (int i = 0; i < fileRange.size() - 1; i++) {
-                defragmentedMap[fileRange[i]] = {}; // Set idNums to empty space
+            for (int j = 0; j < fileRange.size(); j++) {
+                defragmentedMap[fileRange[j]] = {}; // Set idNums to empty space
             }
         }
 
         idNum --;
     }
-
-    // PRINT DEFRAG MAP!
-
 
     return defragmentedMap;
 }
@@ -164,15 +151,24 @@ std::pair<size_t, size_t> checkSum(const std::string& path) {
     const List compacted = compactDisk(expanded);
     const List defragmented = defragmentDisk(expanded);
 
-    size_t checksum = 0;
+    size_t compactedCheckSum = 0;
     for (int i = 0; i < compacted.size(); i++) {
         if (compacted[i].empty()) {
             continue;
         }
-        checksum += i * compacted[i][0];
+        compactedCheckSum += i * compacted[i][0];
     }
 
-    return std::make_pair(checksum, checksum);
+    size_t defragmentedCheckSum = 0;
+    for (int i = 0; i < defragmented.size(); i++) {
+        if (defragmented[i].empty()) {
+            continue;
+        }
+
+        defragmentedCheckSum += i * defragmented[i][0];
+    }
+
+    return std::make_pair(compactedCheckSum, defragmentedCheckSum);
 }
 
 int main() {
