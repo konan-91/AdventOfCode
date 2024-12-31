@@ -20,7 +20,6 @@ std::vector<int> readFile(const std::string& path) {
         diskMap.push_back(c - '0');
     }
 
-    std::vector inputTest = {2, 3, 3, 3, 1, 3, 3, 1, 2, 1, 4, 1, 4, 1, 3, 1, 4, 0, 2};
     return diskMap;
 }
 
@@ -173,6 +172,6 @@ std::pair<size_t, size_t> checkSum(const std::string& path) {
 
 int main() {
     auto [compactedCheckSum, defragmentedCheckSum] = checkSum("AoC-24/input_files/day_9/input.txt");
-    std::cout << "\nCompacted Checksum: " << compactedCheckSum << "\n";
+    std::cout << "Compacted Checksum: " << compactedCheckSum << "\n";
     std::cout << "Defragmented Checksum: " << defragmentedCheckSum << "\n";
 }
