@@ -129,13 +129,13 @@ List defragmentDisk(List defragmentedMap) {
             contiguousSpace = {};
         }
 
-        // If there is contiguous free space available, move the file! also set origin pos to '.'
+        // If there is contiguous free space available, move the file
         if (moveFile) {
             for (int i = 0; i < fileRange.size(); i++) {
-                defragmentedMap[contiguousSpace[i]] = {idNum}; // Set empty space to idNum
+                defragmentedMap[contiguousSpace[i]] = {idNum};
             }
             for (int j = 0; j < fileRange.size(); j++) {
-                defragmentedMap[fileRange[j]] = {}; // Set idNums to empty space
+                defragmentedMap[fileRange[j]] = {};
             }
         }
 
