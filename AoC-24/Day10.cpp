@@ -1,4 +1,4 @@
-// Advent Of Code 2024++, Day 1.
+// Advent Of Code 2024++, Day 10.
 // https://adventofcode.com/2024/day/10
 
 #include <fstream>
