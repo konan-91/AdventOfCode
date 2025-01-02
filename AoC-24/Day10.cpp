@@ -4,11 +4,12 @@
 
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <sstream>
 #include <string>
 
 using TopographicMap = std::vector<std::vector<int>>;
-using Trailhead = std::pair<int, int>;
+using Position = std::pair<int, int>;
 
 TopographicMap readFile(const std::string& path) {
     std::ifstream file(path);
@@ -49,16 +50,16 @@ TopographicMap readFile(const std::string& path) {
         {1, 0, 4, 5, 6, 7, 3, 2}
     };
 
-    return testInput2;
+    return testInput;
 }
 
-std::vector<Trailhead> findTrailheads(const TopographicMap& map) {
-    std::vector<Trailhead> trailheads;
+std::vector<Position> findTrailheads(const TopographicMap& map) {
+    std::vector<Position> trailheads;
 
     for (int i = 0; i < map.size(); i++) {
         for (int j = 0; j < map[0].size(); j++) {
             if (map[i][j] == 0) {
-                trailheads.push_back(std::make_pair(i, j));
+                trailheads.emplace_back(i, j);
             }
         }
     }
@@ -66,22 +67,58 @@ std::vector<Trailhead> findTrailheads(const TopographicMap& map) {
     return trailheads;
 }
 
-int trailheadScore(const TopographicMap& map, const Trailhead& trailhead) {
-    int score = 0;
-    // Try to start a DFS in 4 directions (if possible)
-    // Same direction may need to be run multiple times if same start has diff ultimate routes
-    // for each time a 9 is reached, score++;
-    score++;
+// TODO: you forgot to add each non-9 position to 'visited'
+int trailheadScore(const TopographicMap& map, const Position pos, std::map<Position, bool>& visited, int& score) {
 
-    return score;
+    // Result case: if 9 encountered
+    if (map[pos.first][pos.second] == 9) {
+        std::cout << "9 FOUND! incrementing score\n";
+        score += 1; // no need to return as no other positions are +1 from 9
+    }
+    visited[pos] = true;
+
+    // Call self on all 4 neighbours, so long as they are in bounds and have no already been visited
+    const std::vector<Position> neighbours = {{pos.first - 1, pos.second}, {pos.first + 1, pos.second},
+                                              {pos.first, pos.second - 1}, {pos.first, pos.second + 1}};
+
+    for (Position neighbour : neighbours) {
+        std::cout << "Trying neighbour: " << neighbour.first << ", " << neighbour.second << "\n";
+        // Neighbour is in bounds
+        if (neighbour.first < 0 || neighbour.first >= map.size() ||
+            neighbour.second < 0 || neighbour.second >= map.size()) {
+                std::cout << "not in bounds\n";
+                continue;
+            }
+
+        // Neighbour has not already been visited
+        if (visited.contains(neighbour)) {
+            std::cout << "already visited\n";
+            continue;
+        }
+
+        // Neighbour is +1 from current position
+        if (map[neighbour.first][neighbour.second] - map[pos.first][pos.second] != 1) {
+            std::cout << "not +1 from currentPos\n";
+            continue;
+        }
+
+        // If valid, call self and explore neighbour
+        std::cout << "Valid! recursing\n\n";
+        trailheadScore(map, neighbour, visited, score);
+    }
+
+    std::cout << "DONE!\n\n";
+
+    return 0;
 }
 
 int sumTrailScores(const TopographicMap& map) {
-    std::vector<Trailhead> trailheads = findTrailheads(map);
+    const std::vector<Position> trailheads = findTrailheads(map);
     int sum = 0;
 
-    for (Trailhead trailhead : trailheads) {
-        sum += trailheadScore(map, trailhead);
+    for (const Position& trailhead : trailheads) {
+        std::map<Position, bool> visited;
+        trailheadScore(map, trailhead, visited, sum);
     }
 
     return sum;
