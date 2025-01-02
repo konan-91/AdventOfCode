@@ -6,8 +6,10 @@
 #include <sstream>
 #include <string>
 
-std::vector<std::vector<long>> openFile(const std::string& path) {
-    std::vector<std::vector<long>> equations;
+using Equation = std::vector<long>;
+
+std::vector<Equation> openFile(const std::string& path) {
+    std::vector<Equation> equations;
     std::ifstream file(path);
     equations.reserve(850);
 
@@ -39,7 +41,7 @@ std::vector<std::vector<long>> openFile(const std::string& path) {
     return equations;
 }
 
-bool equationCheck(const std::vector<long>& equation, const long position, const long total, const long& endIdx) {
+bool equationCheck(const Equation& equation, const long position, const long total, const long& endIdx) {
     if (position == endIdx) {
         return (total + equation[endIdx] == equation[0] || total * equation[endIdx] == equation[0]);
     }
@@ -51,7 +53,7 @@ bool equationCheck(const std::vector<long>& equation, const long position, const
     return equationCheck(equation, position + 1, total + equation[position], endIdx);
 }
 
-bool concatenateCheck(const std::vector<long>& equation, const long position, const long total, const long& endIdx) {
+bool concatenateCheck(const Equation& equation, const long position, const long total, const long& endIdx) {
     const std::string str_concatenation = std::to_string(total) + std::to_string(equation[position]);
     const long concatenation = std::stoll(str_concatenation);
 
@@ -70,7 +72,7 @@ bool concatenateCheck(const std::vector<long>& equation, const long position, co
     return concatenateCheck(equation, position + 1, total + equation[position], endIdx);
 }
 
-std::pair<long, long> calibrationSum(const std::vector<std::vector<long>>& equations) {
+std::pair<long, long> calibrationSum(const std::vector<Equation>& equations) {
     long sum = 0;
     long concatenateSum = 0;
 
@@ -88,7 +90,7 @@ std::pair<long, long> calibrationSum(const std::vector<std::vector<long>>& equat
 }
 
 int main() {
-    std::vector<std::vector<long>> input = openFile("AoC-24/input_files/day_7/input.txt");
+    std::vector<Equation> input = openFile("AoC-24/input_files/day_7/input.txt");
     auto [calibration, concatenation] = calibrationSum(input);
     std::cout << "Sum of calibration results: " << calibration << "\n";
     std::cout << "Sum including concatenation: " << concatenation << "\n";

@@ -71,7 +71,7 @@ void trailheadScore(const TopographicMap& map, const Position &pos, PositionCach
             continue;
         }
 
-        // Neighbour value is +1 from current position
+        // Neighbour's value is +1 from current position
         if (map[neighbour.first][neighbour.second] - map[pos.first][pos.second] != 1) {
             continue;
         }
