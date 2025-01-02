@@ -67,12 +67,11 @@ std::vector<Position> findTrailheads(const TopographicMap& map) {
     return trailheads;
 }
 
-// TODO: you forgot to add each non-9 position to 'visited'
-int trailheadScore(const TopographicMap& map, const Position pos, std::map<Position, bool>& visited, int& score) {
+void trailheadScore(const TopographicMap& map, const Position pos, std::map<Position, bool>& visited, int& score) {
 
     // Result case: if 9 encountered
     if (map[pos.first][pos.second] == 9) {
-        std::cout << "9 FOUND! incrementing score\n";
+        //std::cout << "9 FOUND! incrementing score\n";
         score += 1; // no need to return as no other positions are +1 from 9
     }
     visited[pos] = true;
@@ -82,34 +81,36 @@ int trailheadScore(const TopographicMap& map, const Position pos, std::map<Posit
                                               {pos.first, pos.second - 1}, {pos.first, pos.second + 1}};
 
     for (Position neighbour : neighbours) {
-        std::cout << "Trying neighbour: " << neighbour.first << ", " << neighbour.second << "\n";
+        //std::cout << "Trying neighbour: " << neighbour.first << ", " << neighbour.second << "\n";
         // Neighbour is in bounds
         if (neighbour.first < 0 || neighbour.first >= map.size() ||
             neighbour.second < 0 || neighbour.second >= map.size()) {
-                std::cout << "not in bounds\n";
+                //std::cout << "not in bounds\n";
                 continue;
             }
 
         // Neighbour has not already been visited
         if (visited.contains(neighbour)) {
-            std::cout << "already visited\n";
+            //std::cout << "already visited\n";
             continue;
         }
 
         // Neighbour is +1 from current position
         if (map[neighbour.first][neighbour.second] - map[pos.first][pos.second] != 1) {
-            std::cout << "not +1 from currentPos\n";
+            //std::cout << "not +1 from currentPos\n";
             continue;
         }
 
         // If valid, call self and explore neighbour
-        std::cout << "Valid! recursing\n\n";
+        //std::cout << "Valid! recursing\n\n";
         trailheadScore(map, neighbour, visited, score);
     }
 
-    std::cout << "DONE!\n\n";
+    //std::cout << "DONE!\n\n";
+}
 
-    return 0;
+void trailheadRating() {
+
 }
 
 int sumTrailScores(const TopographicMap& map) {
@@ -127,6 +128,7 @@ int sumTrailScores(const TopographicMap& map) {
 int main() {
     const auto& map = readFile("AoC-24/input_files/day_10/input.txt");
     const int ans = sumTrailScores(map);
+    std::cout << "Answer: " << ans << "\n";
 
     for (auto row : map) {
         for (const int i : row) {
