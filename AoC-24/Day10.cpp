@@ -1,6 +1,5 @@
 // Advent Of Code 2024++, Day 1.
 // https://adventofcode.com/2024/day/10
-// TODO: everything. This week is a work in progress...
 
 #include <fstream>
 #include <iostream>
@@ -10,6 +9,7 @@
 
 using TopographicMap = std::vector<std::vector<int>>;
 using Position = std::pair<int, int>;
+using PositionCache = std::map<Position, bool>;
 
 TopographicMap readFile(const std::string& path) {
     std::ifstream file(path);
@@ -32,33 +32,15 @@ TopographicMap readFile(const std::string& path) {
         map.push_back(row);
     }
 
-    TopographicMap testInput = {
-        {0, 1, 2, 3},
-        {1, 2, 3, 4},
-        {8, 7, 6, 5},
-        {9, 8, 7, 6}
-    };
-
-    TopographicMap testInput2 = {
-        {8, 9, 0, 1, 0, 1, 2, 3},
-        {7, 8, 1, 2, 1, 8, 7, 4},
-        {8, 7, 4, 3, 0, 9, 6, 5},
-        {9, 6, 5, 4, 9, 8, 7, 4},
-        {4, 5, 6, 7, 8, 9, 0, 3},
-        {3, 2, 0, 1, 9, 0, 1, 2},
-        {0, 1, 3, 2, 9, 8, 0, 1},
-        {1, 0, 4, 5, 6, 7, 3, 2}
-    };
-
-    return testInput;
+    return map;
 }
 
-std::vector<Position> findTrailheads(const TopographicMap& map) {
+std::vector<Position> findTrailheads(const TopographicMap& map, const int& target) {
     std::vector<Position> trailheads;
 
     for (int i = 0; i < map.size(); i++) {
         for (int j = 0; j < map[0].size(); j++) {
-            if (map[i][j] == 0) {
+            if (map[i][j] == target) {
                 trailheads.emplace_back(i, j);
             }
         }
@@ -67,75 +49,80 @@ std::vector<Position> findTrailheads(const TopographicMap& map) {
     return trailheads;
 }
 
-void trailheadScore(const TopographicMap& map, const Position pos, std::map<Position, bool>& visited, int& score) {
 
-    // Result case: if 9 encountered
+// Using DFS to calculate how many peaks are accessible from each trailhead while caching traversed positions
+void trailheadScore(const TopographicMap& map, const Position &pos, PositionCache& visited, int& score) {
     if (map[pos.first][pos.second] == 9) {
-        //std::cout << "9 FOUND! incrementing score\n";
-        score += 1; // no need to return as no other positions are +1 from 9
+        score++;
     }
     visited[pos] = true;
 
-    // Call self on all 4 neighbours, so long as they are in bounds and have no already been visited
     const std::vector<Position> neighbours = {{pos.first - 1, pos.second}, {pos.first + 1, pos.second},
                                               {pos.first, pos.second - 1}, {pos.first, pos.second + 1}};
-
     for (Position neighbour : neighbours) {
-        //std::cout << "Trying neighbour: " << neighbour.first << ", " << neighbour.second << "\n";
         // Neighbour is in bounds
         if (neighbour.first < 0 || neighbour.first >= map.size() ||
             neighbour.second < 0 || neighbour.second >= map.size()) {
-                //std::cout << "not in bounds\n";
                 continue;
             }
 
         // Neighbour has not already been visited
         if (visited.contains(neighbour)) {
-            //std::cout << "already visited\n";
             continue;
         }
 
-        // Neighbour is +1 from current position
+        // Neighbour value is +1 from current position
         if (map[neighbour.first][neighbour.second] - map[pos.first][pos.second] != 1) {
-            //std::cout << "not +1 from currentPos\n";
             continue;
         }
 
-        // If valid, call self and explore neighbour
-        //std::cout << "Valid! recursing\n\n";
+        // If valid, call self and explore neighbour(s)
         trailheadScore(map, neighbour, visited, score);
     }
-
-    //std::cout << "DONE!\n\n";
 }
 
-void trailheadRating() {
+// Passing by value instead of by reference to calculates the total no. paths     ↓
+void trailheadRating(const TopographicMap& map, const Position &pos, PositionCache visited, int& rating) {
+    if (map[pos.first][pos.second] == 9) {
+        rating++;
+    }
+    visited[pos] = true;
 
+    const std::vector<Position> neighbours = {{pos.first - 1, pos.second}, {pos.first + 1, pos.second},
+                                              {pos.first, pos.second - 1}, {pos.first, pos.second + 1}};
+    for (Position neighbour : neighbours) {
+        if (neighbour.first < 0 || neighbour.first >= static_cast<int>(map.size()) ||
+            neighbour.second < 0 || neighbour.second >= static_cast<int>(map[0].size()) ||
+            map[neighbour.first][neighbour.second] - map[pos.first][pos.second] != 1 ||
+            visited.contains(neighbour)) {
+            continue;
+            }
+
+        trailheadRating(map, neighbour, visited, rating);
+    }
 }
 
-int sumTrailScores(const TopographicMap& map) {
-    const std::vector<Position> trailheads = findTrailheads(map);
-    int sum = 0;
+std::pair<int, int> sumTrailScores(const TopographicMap& map) {
+    const std::vector<Position> trailheads = findTrailheads(map, 0);
+    int totalScore = 0;
+    int totalRating = 0;
 
     for (const Position& trailhead : trailheads) {
-        std::map<Position, bool> visited;
-        trailheadScore(map, trailhead, visited, sum);
+        PositionCache visited;
+        trailheadScore(map, trailhead, visited, totalScore);
     }
 
-    return sum;
+    for (const Position& trailhead : trailheads) {
+        const PositionCache visited;
+        trailheadRating(map, trailhead, visited, totalRating);
+    }
+
+    return std::make_pair(totalScore, totalRating);
 }
 
 int main() {
     const auto& map = readFile("AoC-24/input_files/day_10/input.txt");
-    const int ans = sumTrailScores(map);
-    std::cout << "Answer: " << ans << "\n";
-
-    for (auto row : map) {
-        for (const int i : row) {
-            std::cout << i;
-        }
-        std::cout << "\n";
-    }
-
-    return ans;
+    auto [score, rating] = sumTrailScores(map);
+    std::cout << "Sum of trailhead scores:  " << score << "\n";
+    std::cout << "Sum of trailhead ratings: " << rating << "\n";
 }
