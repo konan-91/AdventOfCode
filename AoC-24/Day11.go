@@ -31,15 +31,23 @@ func readFile(path string) []uint64 {
 	return intArr
 }
 
-// PT.2 SOLUTION -> Cache solutions in map. For each stone, before doing anything, check if the answer is in the cache.
-// If yes, use the answer and skip.
-// If no, calculate the answer and add to the cache.
-func blink(stones *[]uint64) []uint64 {
+// TODO: find a better solution than caching. Even when you answer is accessed rather than calculated,
+// TODO: it is still insanely slow.
+func blink(stones *[]uint64, cache *map[uint64][]uint64) []uint64 {
 	changedStones := make([]uint64, 0, len(*stones)*2)
 
 	for _, stone := range *stones {
+		// Dereference the pointer to access the map
+		if value, exists := (*cache)[stone]; exists {
+			for _, item := range value {
+				changedStones = append(changedStones, item)
+			}
+			continue
+		}
+
 		if stone == 0 {
 			changedStones = append(changedStones, 1)
+			(*cache)[stone] = append((*cache)[stone], 1)
 			continue
 		}
 
@@ -49,10 +57,12 @@ func blink(stones *[]uint64) []uint64 {
 		if N%2 == 0 {
 			// Split in half & append
 			lhsNum, _ := strconv.ParseUint(runeStone[0:N/2], 10, 64)
-			rhsNum, _ := strconv.ParseUint(runeStone[N/2:N], 10, 64)
+			rhsNum, _ := strconv.ParseUint(runeStone[N/2:], 10, 64)
 			changedStones = append(changedStones, lhsNum, rhsNum)
+			(*cache)[stone] = append((*cache)[stone], lhsNum, rhsNum)
 		} else {
 			changedStones = append(changedStones, stone*2024)
+			(*cache)[stone] = append((*cache)[stone], stone*2024)
 		}
 	}
 
@@ -60,17 +70,20 @@ func blink(stones *[]uint64) []uint64 {
 }
 
 func countStones(path string) int {
-	blinkNum := 0
 	stones := readFile(path)
-	for i := 0; i < 40; i++ {
+	cache := make(map[uint64][]uint64)
+	blinkNum := 0
+
+	for i := 0; i < 49; i++ {
 		if blinkNum == 25 {
 			fmt.Println("Stones at 25th blink:", len(stones))
 		} else {
 			fmt.Println("Blink no.:", blinkNum+1)
 		}
 		blinkNum++
-		stones = blink(&stones)
+		stones = blink(&stones, &cache)
 	}
+
 	return len(stones)
 }
 
