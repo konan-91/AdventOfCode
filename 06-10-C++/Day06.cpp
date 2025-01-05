@@ -153,7 +153,7 @@ std::pair<int, int> simulatePatrol(Lab& lab) {
 }
 
 int main() {
-    Lab lab{readFile("AoC-24/input_files/day_06/input.txt")};
+    Lab lab{readFile("input_files/day_06/input.txt")};
     auto [positionCount, loopCount] = simulatePatrol(lab);
 
     std::cout << "Unique Positions: " << positionCount << std::endl;
