@@ -1,6 +1,6 @@
 // Advent Of Code 2024++, Day 11.
 // https://adventofcode.com/2024/day/11
-// WORK IN PROGRESS!! Please check back later..
+// WORK IN PROGRESS!! Please check back later...
 package main
 
 import (
@@ -30,13 +30,6 @@ func readFile(path string) map[uint64]uint64 {
 		}
 	}
 
-	// Temp
-	for key := range intMap {
-		fmt.Printf("%d,%d  ", key, intMap[key])
-	}
-	fmt.Println()
-	intMap = map[uint64]uint64{125: 1, 17: 1} // Temp test
-
 	return intMap
 }
 
@@ -44,22 +37,36 @@ func blink(stones *map[uint64]uint64) map[uint64]uint64 {
 	changedStones := make(map[uint64]uint64, len(*stones)*2)
 
 	for key := range *stones {
-
-		// Add cache logic here later if need be
-
 		if key == 0 {
-			changedStones[1] = (*stones)[key]
+			if _, exists := changedStones[1]; exists {
+				changedStones[1] += (*stones)[key]
+			} else {
+				changedStones[1] = (*stones)[key]
+			}
 			continue
 		}
 
 		runeStone := strconv.FormatUint(key, 10)
 		N := len(runeStone)
+
 		if N%2 == 0 {
 			left, _ := strconv.ParseUint(runeStone[0:N/2], 10, 64)
 			right, _ := strconv.ParseUint(runeStone[N/2:], 10, 64)
-			changedStones[left], changedStones[right] = (*stones)[key], (*stones)[key]
+			halves := []uint64{left, right}
+
+			for i := 0; i < 2; i++ {
+				if _, exists := changedStones[halves[i]]; exists {
+					changedStones[halves[i]] += (*stones)[key]
+				} else {
+					changedStones[halves[i]] = (*stones)[key]
+				}
+			}
 		} else {
-			changedStones[key*2024] = (*stones)[key]
+			if _, exists := changedStones[key*2024]; exists {
+				changedStones[key*2024] += (*stones)[key]
+			} else {
+				changedStones[key*2024] = (*stones)[key]
+			}
 		}
 	}
 
@@ -68,28 +75,29 @@ func blink(stones *map[uint64]uint64) map[uint64]uint64 {
 
 func countStones(path string) uint64 {
 	stones := readFile(path)
-	var ans uint64 = 0
-	blinkNum := 1
+	var total uint64
 
-	for i := 0; i < 6; i++ {
-		if blinkNum == 25 {
-			fmt.Println("Stones at 25th blink:", len(stones))
-		} else {
-			fmt.Println("Blink no.:", blinkNum)
-		}
-
-		blinkNum++
+	for blinkNum := 1; blinkNum <= 75; blinkNum++ {
 		stones = blink(&stones)
+
+		if blinkNum == 25 {
+			total = sumStones(stones)
+			fmt.Println("Stones at 25th blink:", total)
+		}
 	}
 
-	for key := range stones {
-		ans += key * stones[key]
-	}
+	return sumStones(stones)
+}
 
-	return ans
+func sumStones(stones map[uint64]uint64) uint64 {
+	var total uint64
+	for _, count := range stones {
+		total += count
+	}
+	return total
 }
 
 func main() {
 	ans := countStones("input_files/day_11/input.txt")
-	fmt.Println("Stones at 75th blink:", ans) // 194,557 LOL - useless code broke answer
+	fmt.Println("Stones at 75th blink:", ans)
 }
