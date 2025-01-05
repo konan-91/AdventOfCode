@@ -57,7 +57,7 @@ public static int similarityScore(List<String> locations) {
 }
 
 public static void main() throws IOException {
-    List<String> locations = Files.readAllLines(Path.of("AoC-24/input_files/day_01/input.txt"));
+    List<String> locations = Files.readAllLines(Path.of("input_files/day_01/input.txt"));
     System.out.printf("Sum: %d%n", absoluteDifference(locations));
     System.out.printf("Similarity: %d%n", similarityScore(locations));
 }
