@@ -90,7 +90,7 @@ std::pair<long, long> calibrationSum(const std::vector<Equation>& equations) {
 }
 
 int main() {
-    std::vector<Equation> input = openFile("AoC-24/input_files/day_7/input.txt");
+    std::vector<Equation> input = openFile("AoC-24/input_files/day_07/input.txt");
     auto [calibration, concatenation] = calibrationSum(input);
     std::cout << "Sum of calibration results: " << calibration << "\n";
     std::cout << "Sum including concatenation: " << concatenation << "\n";

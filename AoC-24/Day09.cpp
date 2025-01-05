@@ -158,7 +158,7 @@ std::pair<size_t, size_t> checkSum(const std::string& path) {
 }
 
 int main() {
-    auto [compactedCheckSum, defragmentedCheckSum] = checkSum("AoC-24/input_files/day_9/input.txt");
+    auto [compactedCheckSum, defragmentedCheckSum] = checkSum("AoC-24/input_files/day_09/input.txt");
     std::cout << "Compacted Checksum: " << compactedCheckSum << "\n";
     std::cout << "Defragmented Checksum: " << defragmentedCheckSum << "\n";
 }
