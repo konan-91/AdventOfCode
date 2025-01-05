@@ -80,6 +80,6 @@ public static int mulCounter(Path path) {
 }
 
 public static void main() {
-    int answer = mulCounter(Path.of("AoC-24/input_files/day_3/input.txt"));
+    int answer = mulCounter(Path.of("AoC-24/input_files/day_03/input.txt"));
     System.out.printf("%nSum of Multiplications: %d%n", answer);
 }
