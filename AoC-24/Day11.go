@@ -1,6 +1,6 @@
 // Advent Of Code 2024++, Day 11.
 // https://adventofcode.com/2024/day/11
-// WORK IN PROGRESS!! Please check back later...
+// WORK IN PROGRESS!! Please check back later..
 package main
 
 import (
@@ -10,81 +10,83 @@ import (
 	"strings"
 )
 
-func readFile(path string) []uint64 {
+func readFile(path string) map[uint64]uint64 {
 	file, err := os.ReadFile(path)
 	if err != nil {
 		panic(err)
 	}
-	// Convert to string & split
 	strArr := strings.Fields(string(file))
 
-	// Convert to []uint64
-	intArr := make([]uint64, len(strArr))
-	for i, str := range strArr {
+	intMap := make(map[uint64]uint64, len(strArr))
+	for _, str := range strArr {
 		num, err := strconv.ParseUint(str, 10, 64)
 		if err != nil {
 			panic(err)
 		}
-		intArr[i] = num
+		if _, exists := intMap[num]; exists {
+			intMap[num] += 1
+		} else {
+			intMap[num] = 1
+		}
 	}
 
-	return intArr
+	// Temp
+	for key := range intMap {
+		fmt.Printf("%d,%d  ", key, intMap[key])
+	}
+	fmt.Println()
+	intMap = map[uint64]uint64{125: 1, 17: 1} // Temp test
+
+	return intMap
 }
 
-// TODO: find a better solution than caching. Even when you answer is accessed rather than calculated,
-// TODO: it is still insanely slow.
-func blink(stones *[]uint64, cache *map[uint64][]uint64) []uint64 {
-	changedStones := make([]uint64, 0, len(*stones)*2)
+func blink(stones *map[uint64]uint64) map[uint64]uint64 {
+	changedStones := make(map[uint64]uint64, len(*stones)*2)
 
-	for _, stone := range *stones {
-		// Dereference the pointer to access the map
-		if value, exists := (*cache)[stone]; exists {
-			for _, item := range value {
-				changedStones = append(changedStones, item)
-			}
+	for key := range *stones {
+
+		// Add cache logic here later if need be
+
+		if key == 0 {
+			changedStones[1] = (*stones)[key]
 			continue
 		}
 
-		if stone == 0 {
-			changedStones = append(changedStones, 1)
-			(*cache)[stone] = append((*cache)[stone], 1)
-			continue
-		}
-
-		runeStone := strconv.FormatUint(stone, 10)
+		runeStone := strconv.FormatUint(key, 10)
 		N := len(runeStone)
-
 		if N%2 == 0 {
-			// Split in half & append
-			lhsNum, _ := strconv.ParseUint(runeStone[0:N/2], 10, 64)
-			rhsNum, _ := strconv.ParseUint(runeStone[N/2:], 10, 64)
-			changedStones = append(changedStones, lhsNum, rhsNum)
-			(*cache)[stone] = append((*cache)[stone], lhsNum, rhsNum)
+			left, _ := strconv.ParseUint(runeStone[0:N/2], 10, 64)
+			right, _ := strconv.ParseUint(runeStone[N/2:], 10, 64)
+			changedStones[left], changedStones[right] = (*stones)[key], (*stones)[key]
 		} else {
-			changedStones = append(changedStones, stone*2024)
-			(*cache)[stone] = append((*cache)[stone], stone*2024)
+			changedStones[key*2024] = (*stones)[key]
 		}
 	}
 
 	return changedStones
 }
 
-func countStones(path string) int {
+func countStones(path string) uint64 {
 	stones := readFile(path)
-	cache := make(map[uint64][]uint64)
-	blinkNum := 0
+	var ans uint64 = 0
+	blinkNum := 1
 
-	for i := 0; i < 49; i++ {
+	for i := 0; i < 6; i++ {
 		if blinkNum == 25 {
 			fmt.Println("Stones at 25th blink:", len(stones))
 		} else {
-			fmt.Println("Blink no.:", blinkNum+1)
+			fmt.Println("Blink no.:", blinkNum)
 		}
+
 		blinkNum++
-		stones = blink(&stones, &cache)
+		stones = blink(&stones)
 	}
 
-	return len(stones)
+	for key := range stones {
+		ans += key * stones[key]
+	}
+
+	return ans
 }
 
 func main() {
