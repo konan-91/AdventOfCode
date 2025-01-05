@@ -1,5 +1,6 @@
 // Advent Of Code 2024++, Day 11.
 // https://adventofcode.com/2024/day/11
+
 package main
 
 import (
@@ -14,19 +15,14 @@ func readFile(path string) map[uint64]uint64 {
 	if err != nil {
 		panic(err)
 	}
-	strArr := strings.Fields(string(file))
 
-	intMap := make(map[uint64]uint64, len(strArr))
-	for _, str := range strArr {
+	intMap := map[uint64]uint64{}
+	for _, str := range strings.Fields(string(file)) {
 		num, err := strconv.ParseUint(str, 10, 64)
 		if err != nil {
 			panic(err)
 		}
-		if _, exists := intMap[num]; exists {
-			intMap[num] += 1
-		} else {
-			intMap[num] = 1
-		}
+		intMap[num]++
 	}
 
 	return intMap
@@ -35,13 +31,9 @@ func readFile(path string) map[uint64]uint64 {
 func blink(stones *map[uint64]uint64) map[uint64]uint64 {
 	changedStones := make(map[uint64]uint64, len(*stones)*2)
 
-	for key := range *stones {
+	for key, value := range *stones {
 		if key == 0 {
-			if _, exists := changedStones[1]; exists {
-				changedStones[1] += (*stones)[key]
-			} else {
-				changedStones[1] = (*stones)[key]
-			}
+			changedStones[1] += value
 			continue
 		}
 
@@ -51,21 +43,10 @@ func blink(stones *map[uint64]uint64) map[uint64]uint64 {
 		if N%2 == 0 {
 			left, _ := strconv.ParseUint(runeStone[0:N/2], 10, 64)
 			right, _ := strconv.ParseUint(runeStone[N/2:], 10, 64)
-			halves := []uint64{left, right}
-
-			for i := 0; i < 2; i++ {
-				if _, exists := changedStones[halves[i]]; exists {
-					changedStones[halves[i]] += (*stones)[key]
-				} else {
-					changedStones[halves[i]] = (*stones)[key]
-				}
-			}
+			changedStones[left] += value
+			changedStones[right] += value
 		} else {
-			if _, exists := changedStones[key*2024]; exists {
-				changedStones[key*2024] += (*stones)[key]
-			} else {
-				changedStones[key*2024] = (*stones)[key]
-			}
+			changedStones[key*2024] += value
 		}
 	}
 
@@ -89,11 +70,11 @@ func countStones(path string) uint64 {
 }
 
 func sumStones(stones map[uint64]uint64) uint64 {
-	var total uint64
+	var sum uint64
 	for _, count := range stones {
-		total += count
+		sum += count
 	}
-	return total
+	return sum
 }
 
 func main() {
