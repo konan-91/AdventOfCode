@@ -37,21 +37,21 @@ func contains(queue *[][2]int, target [2]int) bool {
 
 func regionPrice(gardenMap *[][]rune, pos [2]int) [2]int {
 	directions := [][2]int{{-1, 0}, {0, 1}, {1, 0}, {0, -1}}
-	traversed := make(map[[2]int][4]int)
+	seen := make(map[[2]int][4]int)
 	queue := [][2]int{pos}
 
 	// Part one: using BFS to find regions by exploring neighbours
-	for len(queue) != 0 {
+	for len(queue) > 0 {
 		pos = queue[0]
-		perimeter := [4]int{0, 0, 0, 0} // Keep track of borders for each position
+		queue = queue[1:]
+		perimeter := [4]int{0, 0, 0, 0}
 		symbol := (*gardenMap)[pos[0]][pos[1]]
 
 		for i, dir := range directions {
-			y := pos[0] + dir[0]
-			x := pos[1] + dir[1]
-			_, exists := traversed[[2]int{y, x}]
+			y, x := pos[0]+dir[0], pos[1]+dir[1]
+			next := [2]int{y, x}
 
-			if exists || contains(&queue, [2]int{y, x}) {
+			if _, exists := seen[next]; exists || contains(&queue, next) {
 				continue
 			}
 
@@ -61,41 +61,39 @@ func regionPrice(gardenMap *[][]rune, pos [2]int) [2]int {
 			}
 
 			if (*gardenMap)[y][x] == symbol {
-				queue = append(queue, [2]int{y, x})
+				queue = append(queue, next)
 			} else {
 				perimeter[i] = 1
 			}
 		}
 
-		traversed[[2]int{pos[0], pos[1]}] = perimeter
-		queue = queue[1:]
+		seen[pos] = perimeter
 	}
 
-	ans1 := 0
-	for plot, perim := range traversed {
+	price1 := 0
+	for plot, perim := range seen {
 		(*gardenMap)[plot[0]][plot[1]] = '*'
 		for _, val := range perim {
-			ans1 += val
+			price1 += val
 		}
 	}
 
 	// Part 2: Finding consecutive rows of fences and applying discount
-	ans2 := ans1
+	price2 := price1
 	for i := 0; i < 4; i++ {
-		for plot, perim := range traversed {
+		for plot, perim := range seen {
 			if perim[i] == 1 {
-				ans2 -= calculateDiscount(&traversed, i, plot)
+				price2 -= calculateDiscount(&seen, i, plot)
 			}
 		}
 	}
+	price1 *= len(seen)
+	price2 *= len(seen)
 
-	ans1 *= len(traversed)
-	ans2 *= len(traversed)
-
-	return [2]int{ans1, ans2}
+	return [2]int{price1, price2}
 }
 
-func calculateDiscount(traversed *map[[2]int][4]int, i int, plot [2]int) int {
+func calculateDiscount(seen *map[[2]int][4]int, i int, plot [2]int) int {
 	discount := 0
 	isVertical := 0
 
@@ -107,11 +105,11 @@ func calculateDiscount(traversed *map[[2]int][4]int, i int, plot [2]int) int {
 		pos := plot
 		pos[isVertical] += dir
 		for {
-			perim, exists := (*traversed)[pos]
+			perim, exists := (*seen)[pos]
 			if exists && perim[i] == 1 {
 				discount++
 				perim[i] = 0
-				(*traversed)[pos] = perim
+				(*seen)[pos] = perim
 				pos[isVertical] += dir
 			} else {
 				break
@@ -140,5 +138,3 @@ func main() {
 	fmt.Println("Sum of fence prices:", sum1)
 	fmt.Println("Sum after discount:", sum2)
 }
-
-// pt.2: 953738
