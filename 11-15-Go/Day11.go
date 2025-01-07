@@ -1,5 +1,7 @@
 // Advent Of Code 2024++, Day 11.
 // https://adventofcode.com/2024/day/11
+//go:build Day11
+// +build Day11
 
 package main
 
