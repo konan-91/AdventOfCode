@@ -1,10 +1,6 @@
 // Advent Of Code 2024++, Day 12.
 // https://adventofcode.com/2024/day/12
 
-// TODO: Complete part 2, calculating price when straight sides count as 1 fence.
-// Also, do your job, uni, make a start on the app. You don't need to finish this straight away.
-// It'll also be more fun and less stressful, and you'll work more.
-
 package main
 
 import (
@@ -88,7 +84,6 @@ func regionPrice(gardenMap *[][]rune, pos [2]int) [2]int {
 	for i := 0; i < 4; i++ {
 		for plot, perim := range traversed {
 			if perim[i] == 1 {
-				// Apply discount for consecutive fences!
 				ans2 -= calculateDiscount(&traversed, i, plot)
 			}
 		}
@@ -102,75 +97,22 @@ func regionPrice(gardenMap *[][]rune, pos [2]int) [2]int {
 
 func calculateDiscount(traversed *map[[2]int][4]int, i int, plot [2]int) int {
 	discount := 0
+	isVertical := 0
 
-	// We are given a traversed position "plot", and the direction of the border for "plot"
-
-	// If the direction is vertical, we must search left and right to see if the border is continued
 	if i == 0 || i == 2 {
-
-		// Search left of plot, setting border to 0 and incrementing discount each step
-		pos := plot
-		pos[1]--
-		for {
-			perim, exists := (*traversed)[pos]
-			if exists && perim[i] == 1 {
-				discount++
-				perim[i] = 0
-				(*traversed)[pos] = perim
-				pos[1]--
-				fmt.Println("Found consec border LEFT!")
-			} else {
-				break
-			}
-		}
-
-		// Search right of plot, setting border to 0 and incrementing discount each step
-		pos = plot
-		pos[1]++
-		for {
-			perim, exists := (*traversed)[pos]
-			if exists && perim[i] == 1 {
-				discount++
-				perim[i] = 0
-				(*traversed)[pos] = perim
-				pos[1]++
-				fmt.Println("Found consec border RIGHT!")
-			} else {
-				break
-			}
-		}
+		isVertical = 1
 	}
 
-	// If the direction is horizontal, we must search up and down to see if the border is continued
-	if i == 1 || i == 3 {
-
-		// Search above plot, setting border to 0 and incrementing discount each step
+	for dir := -1; dir <= 1; dir += 2 {
 		pos := plot
-		pos[0]--
+		pos[isVertical] += dir
 		for {
 			perim, exists := (*traversed)[pos]
 			if exists && perim[i] == 1 {
 				discount++
 				perim[i] = 0
 				(*traversed)[pos] = perim
-				pos[0]--
-				fmt.Println("Found consec border UP!")
-			} else {
-				break
-			}
-		}
-
-		// Search below plot, setting border to 0 and incrementing discount each step
-		pos = plot
-		pos[0]++
-		for {
-			perim, exists := (*traversed)[pos]
-			if exists && perim[i] == 1 {
-				discount++
-				perim[i] = 0
-				(*traversed)[pos] = perim
-				pos[0]++
-				fmt.Println("Found consec border DOWN!")
+				pos[isVertical] += dir
 			} else {
 				break
 			}
