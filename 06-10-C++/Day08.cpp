@@ -126,7 +126,7 @@ std::set<Position> collectHarmonicAntinodes(const Grid& city, const char& target
 }
 
 int main() {
-    const Grid city = readFile("AoC-24/input_files/day_08/input.txt");
+    const Grid city = readFile("input_files/day_08/input.txt");
     const std::set<char> charSet = uniqueChars(city);
     std::set<Position> antinodeSet;
 

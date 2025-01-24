@@ -121,7 +121,7 @@ std::pair<int, int> sumTrailScores(const TopographicMap& map) {
 }
 
 int main() {
-    const auto& map = readFile("AoC-24/input_files/day_10/input.txt");
+    const auto& map = readFile("input_files/day_10/input.txt");
     auto [score, rating] = sumTrailScores(map);
     std::cout << "Sum of trailhead scores:  " << score << "\n";
     std::cout << "Sum of trailhead ratings: " << rating << "\n";
