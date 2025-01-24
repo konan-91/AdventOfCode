@@ -50,7 +50,7 @@ public static int mulCounter(Path path) {
     boolean mulCheckEnabled = true;
 
     while (i < instructions.length() - 7) {
-        // mulCheckSwitch = true; // Uncomment this line for pt.1 result
+        // mulCheckEnabled = true; // Uncomment this line for pt.1 result
         if (mulCheckEnabled) {
             if (instructions.charAt(i) == 'm') {
                 int res = mulCheck(instructions, i);
@@ -80,6 +80,6 @@ public static int mulCounter(Path path) {
 }
 
 public static void main() {
-    int answer = mulCounter(Path.of("AoC-24/input_files/day_03/input.txt"));
+    int answer = mulCounter(Path.of("01-05-Java/input_files/day_03/input.txt"));
     System.out.printf("%nSum of Multiplications: %d%n", answer);
 }

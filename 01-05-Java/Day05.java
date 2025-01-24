@@ -117,7 +117,7 @@ public static List<Integer> sumUpdates(Path path){
 }
 
 public static void main() {
-    Path path = Path.of("AoC-24/input_files/day_05/input.txt");
+    Path path = Path.of("01-05-Java/input_files/day_05/input.txt");
     List<Integer> result = sumUpdates(path);
     System.out.printf("Sum of middle values from valid  %d%n", result.get(0));
     System.out.printf("Sum of middle values from ordered invalid lines: %d%n", result.get(1));

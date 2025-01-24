@@ -66,6 +66,6 @@ public static List<Integer> noSafeReports(Path path) throws IOException {
 }
 
 public static void main() throws IOException {
-    List<Integer> result = noSafeReports(Path.of("AoC-24/input_files/day_02/input.txt"));
+    List<Integer> result = noSafeReports(Path.of("01-05-Java/input_files/day_02/input.txt"));
     System.out.printf("Safe Reports: %d\nTotal safe reports: %d", result.get(0), result.get(1));
 }
