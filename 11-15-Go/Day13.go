@@ -6,6 +6,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 	"regexp"
 	"strconv"
@@ -60,13 +61,16 @@ func readFile(path string) [][]int64 {
 }
 
 func tokenCount(buttonA [2]int64, buttonB [2]int64, target [2]int64) int64 {
-	score := [2]int64{0, 0}
-	presses := [2]int64{0, 0}
-	var tokens int64 = 0
+	// System of linear equations: set one equal to the other and solve for Ax, Bx
+	Ax := float64(buttonB[1]*target[0]-buttonB[0]*target[1]) / float64(buttonB[1]*buttonA[0]-buttonB[0]*buttonA[1])
+	Bx := float64(buttonA[1]*target[0]-buttonA[0]*target[1]) / float64(buttonA[1]*buttonB[0]-buttonA[0]*buttonB[1])
 
-	// Work in Progress...
+	// If results are not integers, there are no valid solutions
+	if Ax != math.Trunc(Ax) || Bx != math.Trunc(Bx) {
+		return 0
+	}
 
-	return 0
+	return int64((3 * Ax) + Bx)
 }
 
 func main() {
@@ -75,12 +79,22 @@ func main() {
 	var tokenSumConverted int64 = 0
 
 	for _, machine := range machines {
+		// Part 1
 		ans := tokenCount(
 			[2]int64{machine[0], machine[1]},
 			[2]int64{machine[2], machine[3]},
 			[2]int64{machine[4], machine[5]})
 		if ans > 0 {
 			tokenSum += ans
+		}
+
+		// Part 2
+		ans = tokenCount(
+			[2]int64{machine[0], machine[1]},
+			[2]int64{machine[2], machine[3]},
+			[2]int64{machine[4] + 10000000000000, machine[5] + 10000000000000})
+		if ans > 0 {
+			tokenSumConverted += ans
 		}
 	}
 
