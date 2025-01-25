@@ -78,6 +78,9 @@ func safetyFactor(coordinates [][]int) int {
 	}
 
 	//TODO: Calculate Safety Factor
+	// Bounds ↓↓↓
+	// Y=0:(Cols/2)-2, X=0:(Rows/2)-2	Y=0:(Cols/2)-2, X=Rows/2:Rows-1
+	// Y=Cols/2:Cols-1, X=0:(Rows/2)-2	Y=Cols/2:Cols-1, X=Rows/2:Rows-1
 
 	return ans
 }
