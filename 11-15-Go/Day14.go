@@ -81,8 +81,34 @@ func safetyFactor(coordinates [][]int) int {
 	// Bounds ↓↓↓
 	// Y=0:(Cols/2)-2, X=0:(Rows/2)-2	Y=0:(Cols/2)-2, X=Rows/2:Rows-1
 	// Y=Cols/2:Cols-1, X=0:(Rows/2)-2	Y=Cols/2:Cols-1, X=Rows/2:Rows-1
+	bounds := [][]int{
+		{0, (Rows / 2) - 2, 0, (Cols / 2) - 2},   // Top Left
+		{0, (Rows / 2) - 2, Cols / 2, Cols - 1},  // Top Right
+		{Rows / 2, Rows - 1, 0, (Cols / 2) - 2},  // Bottom Left
+		{Rows / 2, Rows - 1, Cols / 2, Cols - 1}, // Bottom Right
+	}
 
-	return ans
+	fmt.Println(bounds)
+
+	for _, bound := range bounds {
+		qSum := 0
+		for i := bound[0]; i < bound[1]; i++ {
+			//fmt.Printf("i: %d\n", i)
+			for j := bound[2]; j < bound[3]; j++ {
+				//fmt.Printf("j: %d\n", j)
+				qSum += finalGrid[i][j]
+			}
+		}
+
+		// Assigning to actual answer. Multiplying
+		if ans != 0 {
+			ans *= qSum
+		} else {
+			ans = qSum
+		}
+	}
+
+	return ans // 200157500 (200,157,500) is too low!
 }
 
 func main() {
