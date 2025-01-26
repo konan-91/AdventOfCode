@@ -1,6 +1,9 @@
 // Advent Of Code 2024, Day 14.
 // https://adventofcode.com/2024/day/14
 
+//go:build Day14
+// +build Day14
+
 package main
 
 import (
