@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	Rows = 101
-	Cols = 103
+	Rows = 103
+	Cols = 101
 )
 
 func readFile(path string) [][]int {
@@ -46,20 +46,70 @@ func readFile(path string) [][]int {
 
 func simulateMovement(coordinates [][]int) [][]int {
 	for i, item := range coordinates {
-		posX := (item[0] + item[2]*100) % Rows
-		posY := (item[1] + item[3]*100) % Cols
-		//fmt.Println(posX, posY)
+		posX := (item[0] + item[2]*100) % Cols
+		posY := (item[1] + item[3]*100) % Rows
 
 		if posX < 0 {
-			posX += Rows
+			posX += Cols
 		}
 		if posY < 0 {
-			posY += Cols
+			posY += Rows
 		}
-		//fmt.Println(posX, posY)
 
 		coordinates[i][0] = posX
 		coordinates[i][1] = posY
+	}
+
+	return coordinates
+}
+
+// TODO: Fix this.
+func xmasTree(coordinates [][]int) [][]int {
+	for iter := range 100 {
+		for i, item := range coordinates {
+			posX := item[0] + item[2]
+			posY := item[1] + item[3]
+
+			if posX > Cols-1 {
+				posX %= Cols
+			}
+			if posY > Rows-1 {
+				posY %= Rows
+			}
+			if posX < 0 {
+				posX += Cols
+			}
+			if posY < 0 {
+				posY += Rows
+			}
+
+			coordinates[i][0] = posX
+			coordinates[i][1] = posY
+		}
+
+		if iter == 27 {
+			// Temp printing result for each step
+			fmt.Println(iter)
+			tmpGrid := make([][]rune, Rows)
+			for i := range tmpGrid {
+				tmpGrid[i] = make([]rune, Cols)
+				for j := range tmpGrid[i] {
+					tmpGrid[i][j] = ' ' // Populate each cell with a space character
+				}
+			}
+
+			for _, item := range coordinates {
+				tmpGrid[item[1]][item[0]] = '*'
+			}
+			for _, row := range tmpGrid {
+				for _, cell := range row {
+					fmt.Printf("%c", cell) // Print the character
+				}
+				fmt.Println() // Move to the next line after each row
+			}
+			fmt.Println("DONE!")
+			// End tmp
+		}
 	}
 
 	return coordinates
@@ -74,28 +124,20 @@ func safetyFactor(coordinates [][]int) int {
 		finalGrid[i] = make([]int, Cols)
 	}
 	for _, item := range grid {
-		finalGrid[item[0]][item[1]]++
+		finalGrid[item[1]][item[0]]++
 	}
 
-	//TODO: Calculate Safety Factor
-	// Bounds ↓↓↓
-	// Y=0:(Cols/2)-2, X=0:(Rows/2)-2	Y=0:(Cols/2)-2, X=Rows/2:Rows-1
-	// Y=Cols/2:Cols-1, X=0:(Rows/2)-2	Y=Cols/2:Cols-1, X=Rows/2:Rows-1
 	bounds := [][]int{
-		{0, (Rows / 2) - 2, 0, (Cols / 2) - 2},   // Top Left
-		{0, (Rows / 2) - 2, Cols / 2, Cols - 1},  // Top Right
-		{Rows / 2, Rows - 1, 0, (Cols / 2) - 2},  // Bottom Left
-		{Rows / 2, Rows - 1, Cols / 2, Cols - 1}, // Bottom Right
+		{0, Rows / 2, 0, Cols / 2},                   // Top Left
+		{0, Rows / 2, (Cols / 2) + 1, Cols},          // Top Right
+		{(Rows / 2) + 1, Rows, 0, Cols / 2},          // Bottom Left
+		{(Rows / 2) + 1, Rows, (Cols / 2) + 1, Cols}, // Bottom Right
 	}
-
-	fmt.Println(bounds)
 
 	for _, bound := range bounds {
 		qSum := 0
 		for i := bound[0]; i < bound[1]; i++ {
-			//fmt.Printf("i: %d\n", i)
 			for j := bound[2]; j < bound[3]; j++ {
-				//fmt.Printf("j: %d\n", j)
 				qSum += finalGrid[i][j]
 			}
 		}
@@ -108,10 +150,11 @@ func safetyFactor(coordinates [][]int) int {
 		}
 	}
 
-	return ans // 200157500 (200,157,500) is too low!
+	return ans
 }
 
 func main() {
 	coordinates := readFile("input_files/day_14/input.txt")
 	fmt.Println(safetyFactor(coordinates))
+	xmasTree(coordinates)
 }
