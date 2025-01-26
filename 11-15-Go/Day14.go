@@ -6,6 +6,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 	"regexp"
 	"strconv"
@@ -63,9 +64,8 @@ func simulateMovement(coordinates [][]int) [][]int {
 	return coordinates
 }
 
-// TODO: Fix this.
-func xmasTree(coordinates [][]int) [][]int {
-	for iter := range 100 {
+func xmasTree(coordinates [][]int) int {
+	for idx := 1; idx < 50000; idx++ {
 		for i, item := range coordinates {
 			posX := item[0] + item[2]
 			posY := item[1] + item[3]
@@ -87,32 +87,45 @@ func xmasTree(coordinates [][]int) [][]int {
 			coordinates[i][1] = posY
 		}
 
-		if iter == 27 {
-			// Temp printing result for each step
-			fmt.Println(iter)
-			tmpGrid := make([][]rune, Rows)
-			for i := range tmpGrid {
-				tmpGrid[i] = make([]rune, Cols)
-				for j := range tmpGrid[i] {
-					tmpGrid[i][j] = ' ' // Populate each cell with a space character
+		// Calculate the average distance to all other points
+		var distances []int
+		for c1 := 0; c1 < len(coordinates); c1 += 1 {
+			for c2 := 0; c2 < len(coordinates); c2 += 1 {
+				dstX := math.Abs(float64(coordinates[c1][0] - coordinates[c2][0]))
+				dstY := math.Abs(float64(coordinates[c1][1] - coordinates[c2][1]))
+				distances = append(distances, int(dstX*dstY))
+			}
+		}
+		average := 0
+		for _, item := range distances {
+			average += item
+		}
+		average /= len(distances)
+
+		// If the average distance is abnormally low, a tree is present
+		if average < 500 {
+			displayGrid := make([][]rune, Rows)
+			for j := range displayGrid {
+				displayGrid[j] = make([]rune, Cols)
+				for k := range displayGrid[j] {
+					displayGrid[j][k] = ' '
 				}
+			}
+			for _, item := range coordinates {
+				displayGrid[item[1]][item[0]] = '*'
+			}
+			for _, line := range displayGrid {
+				for _, char := range line {
+					fmt.Printf("%c", char)
+				}
+				fmt.Println()
 			}
 
-			for _, item := range coordinates {
-				tmpGrid[item[1]][item[0]] = '*'
-			}
-			for _, row := range tmpGrid {
-				for _, cell := range row {
-					fmt.Printf("%c", cell) // Print the character
-				}
-				fmt.Println() // Move to the next line after each row
-			}
-			fmt.Println("DONE!")
-			// End tmp
+			return idx
 		}
 	}
 
-	return coordinates
+	return -1
 }
 
 func safetyFactor(coordinates [][]int) int {
@@ -141,8 +154,6 @@ func safetyFactor(coordinates [][]int) int {
 				qSum += finalGrid[i][j]
 			}
 		}
-
-		// Assigning to actual answer. Multiplying
 		if ans != 0 {
 			ans *= qSum
 		} else {
@@ -155,6 +166,7 @@ func safetyFactor(coordinates [][]int) int {
 
 func main() {
 	coordinates := readFile("input_files/day_14/input.txt")
-	fmt.Println(safetyFactor(coordinates))
-	xmasTree(coordinates)
+	xmasScore := xmasTree(coordinates)
+	fmt.Println("Safety factor after 100 seconds:", safetyFactor(coordinates))
+	fmt.Println("Seconds before xmas tree formed:", xmasScore)
 }
