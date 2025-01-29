@@ -5,12 +5,11 @@ package main
 
 import "fmt"
 
-func getGrid() {
-
+func getGrid(path string) {
 	return
 }
 
-func getInstructions() {
+func getInstructions(path string) {
 	return
 }
 
@@ -18,6 +17,13 @@ func simulateMovements() {
 	return
 }
 
+func sumCoordinates() int {
+	ans := 0
+
+	return ans
+}
+
 func main() {
-	fmt.Println("Check back later!")
+	ans := sumCoordinates(x, y)
+	fmt.Println()
 }
