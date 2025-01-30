@@ -19,11 +19,10 @@ func simulateMovements() {
 
 func sumCoordinates() int {
 	ans := 0
-
 	return ans
 }
 
 func main() {
 	ans := sumCoordinates(x, y)
-  fmt.Println(ans)
+    fmt.Println(ans)
 }
