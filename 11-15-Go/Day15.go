@@ -25,5 +25,5 @@ func sumCoordinates() int {
 
 func main() {
 	ans := sumCoordinates(x, y)
-	fmt.Println()
+  fmt.Println(ans)
 }
